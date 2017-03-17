@@ -99,6 +99,9 @@ class PointView: UIView, UIGestureRecognizerDelegate {
     }
     
     func handleGesture(recognizer:UIPanGestureRecognizer) {
+        if (recognizer.state == .ended || recognizer.state == .cancelled) {
+            (superview as? FinishMovingDelegate)?.didFinishMoving()
+        }
         let translation = recognizer.translation(in: self)
         if let view = recognizer.view {
             view.center = CGPoint(x:view.center.x + translation.x,
@@ -113,14 +116,15 @@ class PointView: UIView, UIGestureRecognizerDelegate {
     }
 }
 
-class FractalView: UIView {
+protocol FinishMovingDelegate {
+    func didFinishMoving()
+}
+
+class ConfigurationView: UIView, FinishMovingDelegate {
     
     var mainPoints: [PointView] = []
-    var vectors: [FVector] = []
     
-    let margin:CGFloat = 0.14
-    
-    var iterations = 1
+    let margin:CGFloat = 0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -153,22 +157,118 @@ class FractalView: UIView {
         
         let point = mainPoints[1]
         setPosition(x: point.center.x, y: point.center.y - 50, forPoint: point)
+        
+        mainPoints.first!.isUserInteractionEnabled = false
+        mainPoints.last!.isUserInteractionEnabled = false
+        
         setNeedsDisplay()
+        self.superview?.setNeedsDisplay()
     }
     
-    func generateVectors() {
-        vectors.removeAll()
-        let origin = self.mainPoints.first!.center
-        let end = self.mainPoints.last!.center
-        for i in 1..<mainPoints.count-1 {
-            let v = FVector(point: mainPoints[i].center, origin: origin, end: end)
-            self.vectors.append(v)
-        }
+    func didFinishMoving() {
+        superview?.setNeedsDisplay()
     }
+
     
     override func draw(_ rect: CGRect) {
         
         if (mainPoints.isEmpty) { return }
+        
+        let bezierPath = UIBezierPath()
+        
+        bezierPath.move(to: mainPoints.first!.center)
+
+        for i in 1..<mainPoints.count {
+            bezierPath.addLine(to: mainPoints[i].center)
+        }
+        
+        bezierPath.lineWidth = 2.0
+        UIColor.red.set()
+        bezierPath.stroke()
+        
+    }
+    
+    func setPosition(x: CGFloat, y: CGFloat, forPoint point: PointView) {
+        point.center = CGPoint(x: x, y: y)
+        self.setNeedsDisplay()
+    }
+    
+    func printTime(label: String = "", start: DispatchTime, end: DispatchTime) {
+        let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
+        let time = nanoTime / 1_000_000
+        
+        print("time: \(time)  __ \(label.uppercased())")
+    }
+}
+
+class FractalView: UIView {
+    
+    var configurationView: ConfigurationView!
+    
+    var shapePoints: [CGPoint] = []
+    
+    var vectors: [FVector] = []
+    
+    var iterations = 1
+
+    
+    var numberOfPoints:Int = 4 {
+        didSet {
+            setupNumberOfPoints(numberOfPoints)
+        }
+    }
+    
+    var radius:CGFloat = 0.6
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: 400, height: 140))
+        configurationView.backgroundColor = UIColor.darkGray
+        self.addSubview(configurationView)
+        
+        shapePoints.append(CGPoint(x: 0, y: 400))
+        shapePoints.append(CGPoint(x: 400, y: 400))
+        self.clearsContextBeforeDrawing = true
+        
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setupNumberOfPoints(_ number: Int) {
+        configurationView.setNumberOfPoints(number)
+    }
+    
+    func setPolygonSideNumber(_ number: Int) {
+        self.shapePoints.removeAll()
+        
+        var center = self.center
+        center.y += configurationView.frame.height / 2
+        
+        let r = self.frame.height * self.radius / 2
+        
+        let pi = CGFloat(M_PI)
+        let N = CGFloat(number)
+        for i in 0..<number {
+            var point = CGPoint()
+            let n = CGFloat(i)
+            point.x = r * cos(2.0*pi*n/N) + center.x
+            point.y = r * sin(2.0*pi*n/N) + center.y
+            self.shapePoints.append(point)
+        }
+        
+        print(self.shapePoints)
+        
+        self.setNeedsDisplay()
+    }
+    
+    override func draw(_ rect: CGRect) {
+        
+        if (configurationView == nil) { return }
+        
+        if (shapePoints.isEmpty || configurationView.mainPoints.isEmpty) { return }
         
         generateVectors()
         
@@ -176,20 +276,49 @@ class FractalView: UIView {
         
         var bezierPath = UIBezierPath()
         
-        bezierPath.move(to: mainPoints.first!.center)
-        let pointA = mainPoints.first!.center
-        let pointB = mainPoints.last!.center
+        let context = UIGraphicsGetCurrentContext()
+        context?.clear(rect)
         
+        /*let basicPath = UIBezierPath()
+        basicPath.move(to: self.shapePoints.first!)
+        for point in self.shapePoints {
+            basicPath.addLine(to: point)
+        }
         
-        let start = DispatchTime.now()
+        UIColor.white.withAlphaComponent(0.3).set()
+        basicPath.stroke()*/
+        
+        for i in 1..<shapePoints.count {
+            
+            let pointA = shapePoints[i]
+            let pointB = shapePoints[i-1]
+            
+            bezierPath.move(to: pointA)
+            
+            drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
+        }
+        
+        let pointA = shapePoints.first!
+        
+        let pointB = shapePoints.last!
+        
+        bezierPath.move(to: pointA)
+        
         drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
         
-        let end = DispatchTime.now()
         bezierPath.lineWidth = 2.0
-        UIColor.red.set()
+        UIColor.yellow.set()
         bezierPath.stroke()
-        
-        printTime(label: "total", start: start, end: end)
+    }
+    
+    func generateVectors() {
+        vectors.removeAll()
+        let origin = configurationView.mainPoints.first!.center
+        let end = configurationView.mainPoints.last!.center
+        for i in 1..<configurationView.mainPoints.count-1 {
+            let v = FVector(point: configurationView.mainPoints[i].center, origin: origin, end: end)
+            self.vectors.append(v)
+        }
     }
     
     func drawPath(pointA: CGPoint, pointB: CGPoint, bezierPath: inout UIBezierPath, iteration: Int) {
@@ -197,11 +326,7 @@ class FractalView: UIView {
         
         let it = iteration + 1
         
-        let start = DispatchTime.now()
         var subpoints = calculateMidPoints(pointA: pointA, pointB: pointB)
-        let end = DispatchTime.now()
-        
-        printTime(label: "midpoint", start: start, end: end)
         
         
         for i in 1..<subpoints.count {
@@ -212,16 +337,10 @@ class FractalView: UIView {
         }
         
         if (iteration == self.iterations) {
-        
             bezierPath.move(to: pointA)
-            //print(subpoints)
-            subpoints.removeFirst()
             for subpoint in subpoints {
                 bezierPath.addLine(to: subpoint)
             }
-        
-            bezierPath.addLine(to: pointB)
-            //bezierPath.append(path)
         }
     }
     
@@ -243,23 +362,16 @@ class FractalView: UIView {
         
         return points
     }
-    
-    func setPosition(x: CGFloat, y: CGFloat, forPoint point: PointView) {
-        point.center = CGPoint(x: x, y: y)
-        self.setNeedsDisplay()
-    }
-    
-    func printTime(label: String = "", start: DispatchTime, end: DispatchTime) {
-        let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
-        let time = nanoTime / 1_000_000
-        
-        print("time: \(time)  __ \(label.uppercased())")
-    }
 }
 
-let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 400))
 
-fractalView.setNumberOfPoints(3)
+let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500))
+
+fractalView.numberOfPoints = 5
+
+fractalView.iterations = 4
+
+fractalView.setPolygonSideNumber(4)
 
 PlaygroundPage.current.liveView = fractalView
 PlaygroundPage.current.needsIndefiniteExecution = true
