@@ -5,8 +5,21 @@ import PlaygroundSupport
 
 let PI2 = CGFloat(2*M_PI)
 
+extension DispatchQueue {
+    
+    static func background(delay: Double = 0.0, background: (()->Void)? = nil, completion: (() -> Void)? = nil) {
+        DispatchQueue.global(qos: .background).async {
+            background?()
+            if let completion = completion {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: {
+                    completion()
+                })
+            }
+        }
+    }
+    
+}
 
-//https://github.com/raywenderlich/SKTUtils/blob/master/SKTUtils/CGVector%2BExtensions.swift
 extension CGPoint {
     func distanceTo(_ point: CGPoint) -> CGFloat {
         let x = self.x - point.x
@@ -96,6 +109,7 @@ class PointView: UIView, UIGestureRecognizerDelegate {
     
         let gesture = UIPanGestureRecognizer(target: self, action:#selector(self.handleGesture(recognizer:)))
         self.addGestureRecognizer(gesture)
+        
     }
     
     func handleGesture(recognizer:UIPanGestureRecognizer) {
@@ -166,7 +180,7 @@ class ConfigurationView: UIView, FinishMovingDelegate {
     }
     
     func didFinishMoving() {
-        superview?.setNeedsDisplay()
+        (superview as? FinishMovingDelegate)?.didFinishMoving()
     }
 
     
@@ -201,7 +215,7 @@ class ConfigurationView: UIView, FinishMovingDelegate {
     }
 }
 
-class FractalView: UIView {
+class FractalView: UIView, FinishMovingDelegate {
     
     var configurationView: ConfigurationView!
     
@@ -211,6 +225,15 @@ class FractalView: UIView {
     
     var iterations = 1
 
+    var radius:CGFloat = 0.6
+    
+    var pathPoints: [CGPoint] = []
+    
+    var displayBasePolygon = false {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
     
     var numberOfPoints:Int = 4 {
         didSet {
@@ -218,7 +241,11 @@ class FractalView: UIView {
         }
     }
     
-    var radius:CGFloat = 0.6
+    var polygonSides:Int = 4 {
+        didSet {
+            setPolygonSideNumber(polygonSides)
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -259,7 +286,7 @@ class FractalView: UIView {
             self.shapePoints.append(point)
         }
         
-        print(self.shapePoints)
+        reset()
         
         self.setNeedsDisplay()
     }
@@ -268,47 +295,59 @@ class FractalView: UIView {
         
         if (configurationView == nil) { return }
         
-        if (shapePoints.isEmpty || configurationView.mainPoints.isEmpty) { return }
-        
-        generateVectors()
+        if (pathPoints.isEmpty) { return }
         
         if (vectors.isEmpty) { return }
         
-        var bezierPath = UIBezierPath()
+        if (displayBasePolygon) { showBasicPolygon() }
         
-        let context = UIGraphicsGetCurrentContext()
-        context?.clear(rect)
+        let path = UIBezierPath()
+        path.move(to: pathPoints.first!)
         
-        /*let basicPath = UIBezierPath()
-        basicPath.move(to: self.shapePoints.first!)
-        for point in self.shapePoints {
-            basicPath.addLine(to: point)
+        //draw()
+        for point in pathPoints {
+            path.addLine(to: point)
         }
         
-        UIColor.white.withAlphaComponent(0.3).set()
-        basicPath.stroke()*/
+        path.addLine(to: pathPoints.first!)
         
-        for i in 1..<shapePoints.count {
+        path.lineWidth = 2.0
+        UIColor.yellow.set()
+        path.stroke()
+    }
+    
+    func draw() {
+        
+        DispatchQueue.background(delay: 0.0, background: {
+            var bezierPath = UIBezierPath()
             
-            let pointA = shapePoints[i]
-            let pointB = shapePoints[i-1]
+            for i in 1..<self.shapePoints.count {
+                
+                let pointA = self.shapePoints[i]
+                let pointB = self.shapePoints[i-1]
+                
+                bezierPath.move(to: pointA)
+                
+                self.drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
+            }
+            
+            let pointA = self.shapePoints.first!
+            
+            let pointB = self.shapePoints.last!
             
             bezierPath.move(to: pointA)
             
-            drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
-        }
+            self.drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
+            
+            
+            //self.path = bezierPath
+            
+        }, completion: {
+            
+            self.setNeedsDisplay()
+        })
         
-        let pointA = shapePoints.first!
         
-        let pointB = shapePoints.last!
-        
-        bezierPath.move(to: pointA)
-        
-        drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
-        
-        bezierPath.lineWidth = 2.0
-        UIColor.yellow.set()
-        bezierPath.stroke()
     }
     
     func generateVectors() {
@@ -362,16 +401,45 @@ class FractalView: UIView {
         
         return points
     }
+    
+    func showBasicPolygon() {
+        let basicPath = UIBezierPath()
+        basicPath.move(to: self.shapePoints.first!)
+        for point in self.shapePoints {
+            basicPath.addLine(to: point)
+        }
+        basicPath.addLine(to: self.shapePoints.first!)
+        UIColor.white.withAlphaComponent(0.3).set()
+        basicPath.stroke()
+    }
+    
+    func didFinishMoving() {
+        reset()
+    }
+    
+    func reset() {
+        self.pathPoints = shapePoints
+        
+        
+        generateVectors()
+        
+        self.setNeedsDisplay()
+        
+        let context = UIGraphicsGetCurrentContext()
+        context?.clear(self.frame)
+    }
 }
 
 
 let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500))
 
-fractalView.numberOfPoints = 5
+fractalView.displayBasePolygon = true
 
-fractalView.iterations = 4
+fractalView.numberOfPoints = 10
 
-fractalView.setPolygonSideNumber(4)
+fractalView.iterations = 2
+
+fractalView.polygonSides = 5
 
 PlaygroundPage.current.liveView = fractalView
 PlaygroundPage.current.needsIndefiniteExecution = true
