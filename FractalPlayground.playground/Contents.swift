@@ -8,7 +8,15 @@ let PI2 = CGFloat(2*M_PI)
 extension DispatchQueue {
     
     static func background(delay: Double = 0.0, background: (()->Void)? = nil, completion: (() -> Void)? = nil) {
-        DispatchQueue.global(qos: .background).async {
+        
+        let backgroundQueue = DispatchQueue(label: "com.app.queue",
+                                            qos: .background,
+                                            target: nil)
+        backgroundQueue.async {
+            
+        
+        
+        //DispatchQueue.global(qos: .background).async {
             background?()
             if let completion = completion {
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: {
@@ -175,6 +183,12 @@ class ConfigurationView: UIView, FinishMovingDelegate {
         mainPoints.first!.isUserInteractionEnabled = false
         mainPoints.last!.isUserInteractionEnabled = false
         
+        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+        button.backgroundColor = .yellow
+        
+        button.addTarget(self, action: #selector(self.redraw(view:)), for: .touchUpInside)
+        self.addSubview(button)
+        
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
     }
@@ -183,6 +197,10 @@ class ConfigurationView: UIView, FinishMovingDelegate {
         (superview as? FinishMovingDelegate)?.didFinishMoving()
     }
 
+    func redraw(view: AnyObject?) {
+        (superview as? FinishMovingDelegate)?.didFinishMoving()
+    }
+    
     
     override func draw(_ rect: CGRect) {
         
@@ -221,6 +239,8 @@ class FractalView: UIView, FinishMovingDelegate {
     
     var shapePoints: [CGPoint] = []
     
+    var path = UIBezierPath()
+    
     var vectors: [FVector] = []
     
     var iterations = 1
@@ -228,6 +248,14 @@ class FractalView: UIView, FinishMovingDelegate {
     var radius:CGFloat = 0.6
     
     var pathPoints: [CGPoint] = []
+    
+    var shouldUpdateScreen = false
+
+    var cancelThread = false
+    
+    var timer: Timer?
+    
+    var runningCalculations = false
     
     var displayBasePolygon = false {
         didSet {
@@ -256,7 +284,6 @@ class FractalView: UIView, FinishMovingDelegate {
         
         shapePoints.append(CGPoint(x: 0, y: 400))
         shapePoints.append(CGPoint(x: 400, y: 400))
-        self.clearsContextBeforeDrawing = true
         
     }
     
@@ -286,6 +313,8 @@ class FractalView: UIView, FinishMovingDelegate {
             self.shapePoints.append(point)
         }
         
+        shapePoints.append(shapePoints.first!)
+        
         reset()
         
         self.setNeedsDisplay()
@@ -301,50 +330,36 @@ class FractalView: UIView, FinishMovingDelegate {
         
         if (displayBasePolygon) { showBasicPolygon() }
         
-        let path = UIBezierPath()
-        path.move(to: pathPoints.first!)
+        let context = UIGraphicsGetCurrentContext()
+        context?.clear(self.frame)
         
-        //draw()
-        for point in pathPoints {
-            path.addLine(to: point)
-        }
-        
-        path.addLine(to: pathPoints.first!)
-        
-        path.lineWidth = 2.0
         UIColor.yellow.set()
+        
         path.stroke()
+        
     }
     
     func draw() {
         
         DispatchQueue.background(delay: 0.0, background: {
-            var bezierPath = UIBezierPath()
+        self.runningCalculations = true
+            //while (self.cancelThread) {}
             
-            for i in 1..<self.shapePoints.count {
-                
-                let pointA = self.shapePoints[i]
-                let pointB = self.shapePoints[i-1]
-                
-                bezierPath.move(to: pointA)
-                
-                self.drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
+            for i in 0..<self.iterations {
+                //print("iteration: \(i)")
+                self.drawSubpaths()
+                if (self.cancelThread) {
+                    self.cancelThread = false
+                    print("cancelling main for")
+                    break }
             }
             
-            let pointA = self.shapePoints.first!
             
-            let pointB = self.shapePoints.last!
-            
-            bezierPath.move(to: pointA)
-            
-            self.drawPath(pointA: pointA, pointB: pointB, bezierPath: &bezierPath, iteration: 1)
-            
-            
-            //self.path = bezierPath
-            
-        }, completion: {
-            
+            self.runningCalculations = false
             self.setNeedsDisplay()
+        }, completion: {
+            print("finished all calculations")
+            
         })
         
         
@@ -358,46 +373,47 @@ class FractalView: UIView, FinishMovingDelegate {
             let v = FVector(point: configurationView.mainPoints[i].center, origin: origin, end: end)
             self.vectors.append(v)
         }
+        
+        
     }
     
-    func drawPath(pointA: CGPoint, pointB: CGPoint, bezierPath: inout UIBezierPath, iteration: Int) {
-        if (iteration > self.iterations) { return }
-        
-        let it = iteration + 1
-        
-        var subpoints = calculateMidPoints(pointA: pointA, pointB: pointB)
-        
-        
-        for i in 1..<subpoints.count {
-            let point = subpoints[i]
-            let origin = subpoints[i-1]
-            
-            drawPath(pointA: origin, pointB: point, bezierPath: &bezierPath, iteration: it)
-        }
-        
-        if (iteration == self.iterations) {
-            bezierPath.move(to: pointA)
-            for subpoint in subpoints {
-                bezierPath.addLine(to: subpoint)
+    func drawSubpaths() {
+        var i = 0
+        while (i < self.pathPoints.count-1) {
+            let subpoints = self.calculateMidPoints(start: i, end: i+1)
+            if (cancelThread) { print("cancelling subpaths"); return }
+            if (i+1 <= pathPoints.count+1) {
+                self.pathPoints.insert(contentsOf: subpoints, at: i+1)
             }
+            i += subpoints.count + 1
         }
     }
     
-    func calculateMidPoints(pointA: CGPoint, pointB: CGPoint) -> [CGPoint] {
+    func pathFromPoints(points: [CGPoint]) -> UIBezierPath {
+        let bezierPath = UIBezierPath()
+        if (points.isEmpty) { return bezierPath }
+        bezierPath.move(to: points.first!)
+        for point in points {
+            bezierPath.addLine(to: point)
+        }
+        return bezierPath
+    }
+    
+    func calculateMidPoints(start: Int, end: Int) -> [CGPoint] {
+        
+        let pointA = self.pathPoints[start]
+        let pointB = self.pathPoints[end]
         
         let lenght = pointA.distanceTo(pointB)
         let angle = pointA.angleTo(pointB)
         
         var points: [CGPoint] = []
-        
-        points.append(pointA)
-        
+    
         for vector in vectors {
+            if (cancelThread) { print("cancelling mid points"); break }
             let p = vector.applyTransform(newOrigin: pointA, lenght: lenght, angle: angle)
             points.append(p)
         }
-        
-        points.append(pointB)
         
         return points
     }
@@ -408,7 +424,6 @@ class FractalView: UIView, FinishMovingDelegate {
         for point in self.shapePoints {
             basicPath.addLine(to: point)
         }
-        basicPath.addLine(to: self.shapePoints.first!)
         UIColor.white.withAlphaComponent(0.3).set()
         basicPath.stroke()
     }
@@ -418,15 +433,45 @@ class FractalView: UIView, FinishMovingDelegate {
     }
     
     func reset() {
+        
+        
+        //if there is something running, cancel and wait for it
+        if (runningCalculations) {
+            print("still running...")
+            cancelThread = true
+            //sleep(50)
+            while (cancelThread) {
+                //print(cancelThread)
+                "hey"
+                
+            } //wait for last used thread to be cancelled
+        }
+        
         self.pathPoints = shapePoints
-        
-        
         generateVectors()
         
-        self.setNeedsDisplay()
+        draw()
         
-        let context = UIGraphicsGetCurrentContext()
-        context?.clear(self.frame)
+        self.path = UIBezierPath()
+        
+        print("starting a new drawing")
+        self.shouldUpdateScreen = true
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block:  { (timer) in
+            if (self.shouldUpdateScreen == false) { return }
+            
+            let path = self.pathFromPoints(points: self.pathPoints)
+            self.path = path
+            
+            self.shouldUpdateScreen = true
+            
+            if (!self.runningCalculations) {
+                timer.invalidate()
+            }
+            
+            self.setNeedsDisplay()
+        })
+        
     }
 }
 
@@ -435,9 +480,9 @@ let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500)
 
 fractalView.displayBasePolygon = true
 
-fractalView.numberOfPoints = 10
+fractalView.numberOfPoints = 6
 
-fractalView.iterations = 2
+fractalView.iterations = 3
 
 fractalView.polygonSides = 5
 
