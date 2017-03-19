@@ -35,8 +35,6 @@ extension CGPoint {
             a -= PI2
         }
         
-        //print("angle: \(a)")
-        
         return a
     }
 }
@@ -138,6 +136,7 @@ class ConfigurationView: UIView, FinishMovingDelegate {
     
     func setNumberOfPoints(_ count: Int) {
         if (count < 2) { return }
+        
         mainPoints.removeAll()
         
         let center = self.center
@@ -157,8 +156,8 @@ class ConfigurationView: UIView, FinishMovingDelegate {
         let point = mainPoints[1]
         setPosition(x: point.center.x, y: point.center.y - 50, forPoint: point)
         
-        mainPoints.first!.isUserInteractionEnabled = false
-        mainPoints.last!.isUserInteractionEnabled = false
+        //mainPoints.first!.isUserInteractionEnabled = false
+        //mainPoints.last!.isUserInteractionEnabled = false
         
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
         button.backgroundColor = .yellow
@@ -240,8 +239,7 @@ class ProcessFractal: Operation {
     var pathPoints: [CGPoint] = []
     var iterations: Int = 1
     var vectors: [FVector] = []
-    var update: ((_ path: UIBezierPath) -> Void)?
-    var bezierOperation = ProcessBezierPath(points: [])
+    var update: ((_ path: [CGPoint]) -> Void)?
     let operationQueue = OperationQueue()
     
     init(withTag tag: Int, points: [CGPoint], vectors: [FVector], iterations: Int) {
@@ -262,20 +260,18 @@ class ProcessFractal: Operation {
     }
     
     func redraw() {
-        if (!self.bezierOperation.isExecuting) {
-            self.bezierOperation = ProcessBezierPath(points: self.pathPoints)
-            self.bezierOperation.completionBlock = {
-                self.update?(self.bezierOperation.bezierPath)
-            }
-            operationQueue.addOperation(bezierOperation)
-        }
-        
+        self.update?(self.pathPoints)
+    }
+    
+    override func cancel() {
+        super.cancel()
+        self.operationQueue.cancelAllOperations()
     }
     
     func drawSubpaths() {
         var i = 0
         while (i < self.pathPoints.count-1) {
-            print("iteration")
+            
             let subpoints = self.calculateMidPoints(start: i, end: i+1)
             if (self.isCancelled) { print("cancelling subpaths"); return }
             if (i+1 <= pathPoints.count+1) {
@@ -337,6 +333,8 @@ class FractalView: UIView, FinishMovingDelegate {
     var runCount: Int = 0
     
     var backgroundOperation: ProcessFractal?
+    
+    var bezierPathOperation: ProcessBezierPath = ProcessBezierPath(points: [])
     
     let operationQueue = OperationQueue()
     
@@ -421,8 +419,9 @@ class FractalView: UIView, FinishMovingDelegate {
         operation.update = {(path) in
             DispatchQueue.main.async {
                 if (operation.TAG == self.runCount) {
-                    self.bezierPath = path
-                    self.setNeedsDisplay()
+                    //self.bezierPath = path
+                    //self.setNeedsDisplay()
+                    self.startBezierCalculation(points: path)
                 }
             }
         }
@@ -440,8 +439,20 @@ class FractalView: UIView, FinishMovingDelegate {
         
         operationQueue.addOperation(operation)
         
-        
-        
+    }
+    
+    func startBezierCalculation(points: [CGPoint]) {
+        if (!self.bezierPathOperation.isExecuting) {
+            let operation = ProcessBezierPath(points: points)
+            operation.completionBlock = {
+                DispatchQueue.main.async {
+                    self.bezierPath = operation.bezierPath
+                    self.setNeedsDisplay()
+                }
+            }
+            
+            operationQueue.addOperation(operation)
+        }
     }
     
     func generateVectors() {
@@ -492,9 +503,9 @@ let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500)
 
 fractalView.displayBasePolygon = false
 
-fractalView.numberOfPoints = 6
+fractalView.numberOfPoints = 5
 
-fractalView.iterations = 1
+fractalView.iterations = 3
 
 fractalView.polygonSides = 5
 
