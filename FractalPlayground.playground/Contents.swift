@@ -211,9 +211,23 @@ class ConfigurationView: UIView, FinishMovingDelegate {
     
 }
 
+struct Line {
+    var path: UIBezierPath
+    var color: UIColor
+}
+
+let numberOfColors = 10
+var colors: [UIColor] = []
+
+
+
 class ProcessBezierPath: Operation {
     var points: [CGPoint] = []
     var bezierPath: UIBezierPath = UIBezierPath()
+    var lines: [Line] = []
+    var currentColor = 0
+    
+    var t: CGFloat = 0.1
     
     init(points: [CGPoint]) {
         self.points = points
@@ -225,13 +239,64 @@ class ProcessBezierPath: Operation {
             return
         }
         
+        
+        
         if self.points.isEmpty { return }
         
-        bezierPath.move(to: self.points.first!)
-        for point in self.points {
-            bezierPath.addLine(to: point)
-        }
+        iterateBetween(i: 0, max: self.points.count)
+        
+        
+        
     }
+    
+    func iterateBetween(i: Int, max:Int) {
+        let start = DispatchTime.now()
+        let pointsPerColor = (self.points.count / numberOfColors) + 1
+        var color = currentColor
+        
+        var bpath = UIBezierPath()
+        bpath.move(to: self.points[color])
+        
+        
+        for i in i..<max {
+            if (self.isCancelled) { return }
+            bpath.addLine(to: self.points[i])
+            
+            if (i % pointsPerColor == 0) {
+                
+                let line = Line(path: bpath.copy() as! UIBezierPath,
+                                color: colors[color])
+                self.lines.append(line)
+                bpath = UIBezierPath()
+                
+                bpath.move(to: self.points[i])
+                
+                color += 1
+                if (color >= numberOfColors) {
+                    color = 0
+                }
+                
+            }
+        }
+        
+        let line = Line(path: bpath.copy() as! UIBezierPath,
+                        color: colors[color])
+        self.lines.append(line)
+        
+        let end = DispatchTime.now()
+        
+        var nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
+        var timeInterval = Double(nanoTime) / 1_000_000_000
+        
+        while (timeInterval < 0.4) {
+            let end = DispatchTime.now()
+            let nano = end.uptimeNanoseconds - start.uptimeNanoseconds
+            timeInterval = Double(nano) / 1_000_000_000
+        }
+        
+    }
+    
+    
 }
 
 class ProcessFractal: Operation {
@@ -273,10 +338,10 @@ class ProcessFractal: Operation {
         while (i < self.pathPoints.count-1) {
             
             let subpoints = self.calculateMidPoints(start: i, end: i+1)
-            if (self.isCancelled) { print("cancelling subpaths"); return }
-            if (i+1 <= pathPoints.count+1) {
+            if (self.isCancelled) { return }
+            //if (i+1 <= pathPoints.count+1) {
                 self.pathPoints.insert(contentsOf: subpoints, at: i+1)
-            }
+            //}
             redraw()
             i += subpoints.count + 1
         }
@@ -293,7 +358,7 @@ class ProcessFractal: Operation {
         var points: [CGPoint] = []
         
         for vector in vectors {
-            if (self.isCancelled) { print("cancelling mid points"); break }
+            if (self.isCancelled) { break }
             let p = vector.applyTransform(newOrigin: pointA, lenght: lenght, angle: angle)
             points.append(p)
         }
@@ -337,6 +402,9 @@ class FractalView: UIView, FinishMovingDelegate {
     var bezierPathOperation: ProcessBezierPath = ProcessBezierPath(points: [])
     
     let operationQueue = OperationQueue()
+    
+    var lines: [Line] = []
+    var oldLines: [Line] = []
     
     var displayBasePolygon = false {
         didSet {
@@ -395,7 +463,6 @@ class FractalView: UIView, FinishMovingDelegate {
         
         reset()
         
-        
         self.setNeedsDisplay()
     }
     
@@ -406,9 +473,21 @@ class FractalView: UIView, FinishMovingDelegate {
         let context = UIGraphicsGetCurrentContext()
         context?.clear(self.frame)
         
-        UIColor.yellow.set()
         
-        bezierPath.stroke()
+    
+        
+        for line in self.lines {
+            line.color.set()
+            line.path.lineWidth = 4.0
+            line.path.stroke()
+            
+            //let shapeLayer = CAShapeLayer()
+            //shapeLayer.path = line.path.cgPath
+            //shapeLayer.strokeColor = line.color.cgColor
+            //shapeLayer.lineWidth = 1.0
+            
+            //self.layer.addSublayer(shapeLayer)
+        }
         
     }
     
@@ -419,8 +498,6 @@ class FractalView: UIView, FinishMovingDelegate {
         operation.update = {(path) in
             DispatchQueue.main.async {
                 if (operation.TAG == self.runCount) {
-                    //self.bezierPath = path
-                    //self.setNeedsDisplay()
                     self.startBezierCalculation(points: path)
                 }
             }
@@ -428,8 +505,8 @@ class FractalView: UIView, FinishMovingDelegate {
         
         operation.completionBlock = {
             DispatchQueue.main.async {
-                print("finished operations")
-                self.setNeedsDisplay()
+                self.bezierPathOperation.cancel()
+                self.startBezierCalculation(points: operation.pathPoints)
             }
         }
 
@@ -446,7 +523,7 @@ class FractalView: UIView, FinishMovingDelegate {
             let operation = ProcessBezierPath(points: points)
             operation.completionBlock = {
                 DispatchQueue.main.async {
-                    self.bezierPath = operation.bezierPath
+                    self.lines = operation.lines
                     self.setNeedsDisplay()
                 }
             }
@@ -497,6 +574,26 @@ class FractalView: UIView, FinishMovingDelegate {
     
     }
 }
+
+func getColor(hue: CGFloat) -> UIColor {
+    return UIColor(hue: hue, saturation: 0.5, brightness: 0.8, alpha: 1.0)
+}
+
+func setupColors() {
+    let colorStep:CGFloat = 1.0 / CGFloat(numberOfColors)
+    var t = colorStep
+    
+    for _ in 0..<numberOfColors {
+        t += colorStep
+        if t > 1 {
+            t = 0
+        }
+        
+        colors.append(getColor(hue: t))
+    }
+}
+
+setupColors()
 
 
 let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500))
