@@ -5,6 +5,27 @@ import PlaygroundSupport
 
 let PI2 = CGFloat(2*M_PI)
 
+func getColor(hue: CGFloat) -> UIColor {
+    return UIColor(hue: hue, saturation: 0.5, brightness: 0.8, alpha: 1.0)
+}
+
+func setupColors(numberOfColors: Int) -> [UIColor] {
+    let colorStep:CGFloat = 1.0 / CGFloat(numberOfColors)
+    var t = colorStep
+    var colors:[UIColor] = []
+    
+    for _ in 0..<numberOfColors {
+        t += colorStep
+        if t > 1 {
+            t = 0
+        }
+        
+        colors.append(getColor(hue: t))
+    }
+    
+    return colors
+}
+
 extension CGPoint {
     func distanceTo(_ point: CGPoint) -> CGFloat {
         let x = self.x - point.x
@@ -19,7 +40,7 @@ extension CGPoint {
         //arc tg isn't a continuous function
         //for some x and y variations, it needs to be added or removed M_PI (180 degrees)
         //for correct angle calculations
-         if (x < 0 && y > 0) {
+        if (x < 0 && y > 0) {
             a = atan(y/x) - CGFloat(M_PI)
         } else if (x < 0 && y < 0) {
             a = atan(y/x) + CGFloat(M_PI)
@@ -38,6 +59,8 @@ extension CGPoint {
         return a
     }
 }
+
+
 
 
 class FVector {
@@ -84,12 +107,12 @@ class FVector {
 
 class PointView: UIView, UIGestureRecognizerDelegate {
     let size = CGSize(width: 12.0, height: 12.0)
-    init(center: CGPoint) {
+    init(center: CGPoint, color: UIColor) {
         super.init(frame: CGRect(origin: center, size: size))
-        self.backgroundColor = .red
+        self.backgroundColor = color
         self.center = center
         self.layer.cornerRadius = self.frame.height/2
-    
+        
         let gesture = UIPanGestureRecognizer(target: self, action:#selector(self.handleGesture(recognizer:)))
         self.addGestureRecognizer(gesture)
         
@@ -123,6 +146,8 @@ class ConfigurationView: UIView, FinishMovingDelegate {
     
     let margin:CGFloat = 0
     
+    var colors: [UIColor] = []
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .black
@@ -146,24 +171,20 @@ class ConfigurationView: UIView, FinishMovingDelegate {
         
         let step = (end - begin)/CGFloat(count - 1)
         
+        colors = setupColors(numberOfColors: count + count - 1)
+        
         for i in 0..<count {
             let centerX = begin + step * CGFloat(i)
-            let view = PointView(center: CGPoint(x: centerX, y: center.y))
+            let view = PointView(center: CGPoint(x: centerX, y: center.y), color: colors[i*2])
             mainPoints.append(view)
             self.addSubview(view)
         }
         
-        let point = mainPoints[1]
-        setPosition(x: point.center.x, y: point.center.y - 50, forPoint: point)
+        //let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+        //button.backgroundColor = .yellow
         
-        //mainPoints.first!.isUserInteractionEnabled = false
-        //mainPoints.last!.isUserInteractionEnabled = false
-        
-        let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
-        button.backgroundColor = .yellow
-        
-        button.addTarget(self, action: #selector(self.redraw(view:)), for: .touchUpInside)
-        self.addSubview(button)
+        //button.addTarget(self, action: #selector(self.redraw(view:)), for: .touchUpInside)
+        //self.addSubview(button)
         
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
@@ -172,7 +193,7 @@ class ConfigurationView: UIView, FinishMovingDelegate {
     func didFinishMoving() {
         (superview as? FinishMovingDelegate)?.didFinishMoving()
     }
-
+    
     func redraw(view: AnyObject?) {
         (superview as? FinishMovingDelegate)?.didFinishMoving()
     }
@@ -182,17 +203,17 @@ class ConfigurationView: UIView, FinishMovingDelegate {
         
         if (mainPoints.isEmpty) { return }
         
-        let bezierPath = UIBezierPath()
         
-        bezierPath.move(to: mainPoints.first!.center)
-
+        
         for i in 1..<mainPoints.count {
+            let bezierPath = UIBezierPath()
+            bezierPath.move(to: mainPoints[i-1].center)
             bezierPath.addLine(to: mainPoints[i].center)
+            bezierPath.lineWidth = 2.0
+            colors[i*2 - 1].set()
+            bezierPath.stroke()
         }
-        
-        bezierPath.lineWidth = 2.0
-        UIColor.red.set()
-        bezierPath.stroke()
+
         
     }
     
@@ -201,12 +222,6 @@ class ConfigurationView: UIView, FinishMovingDelegate {
         self.setNeedsDisplay()
     }
     
-    func printTime(label: String = "", start: DispatchTime, end: DispatchTime) {
-        let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
-        let time = nanoTime / 1_000_000
-        
-        print("time: \(time)  __ \(label.uppercased())")
-    }
     
     
 }
@@ -257,7 +272,6 @@ class ProcessBezierPath: Operation {
         var bpath = UIBezierPath()
         bpath.move(to: self.points[color])
         
-        
         for i in i..<max {
             if (self.isCancelled) { return }
             bpath.addLine(to: self.points[i])
@@ -285,17 +299,16 @@ class ProcessBezierPath: Operation {
         
         let end = DispatchTime.now()
         
-        var nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
+        let nanoTime = end.uptimeNanoseconds - start.uptimeNanoseconds
         var timeInterval = Double(nanoTime) / 1_000_000_000
         
-        while (timeInterval < 0.4) {
+        while (timeInterval < 0.25) {
             let end = DispatchTime.now()
             let nano = end.uptimeNanoseconds - start.uptimeNanoseconds
             timeInterval = Double(nano) / 1_000_000_000
         }
         
     }
-    
     
 }
 
@@ -340,7 +353,7 @@ class ProcessFractal: Operation {
             let subpoints = self.calculateMidPoints(start: i, end: i+1)
             if (self.isCancelled) { return }
             //if (i+1 <= pathPoints.count+1) {
-                self.pathPoints.insert(contentsOf: subpoints, at: i+1)
+            self.pathPoints.insert(contentsOf: subpoints, at: i+1)
             //}
             redraw()
             i += subpoints.count + 1
@@ -377,9 +390,45 @@ class ProcessFractal: Operation {
     }
 }
 
+class FractalDrawingView: UIView {
+    var lines: [Line] = []
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.clipsToBounds = true
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func draw(_ rect: CGRect) {
+        
+        //if (displayBasePolygon) { showBasicPolygon() }
+        
+        let context = UIGraphicsGetCurrentContext()
+        context?.clear(self.frame)
+        
+        
+        layer.sublayers?.forEach { $0.removeFromSuperlayer() }
+        
+        for line in self.lines {
+            
+            let shapeLayer = CAShapeLayer()
+            shapeLayer.path = line.path.cgPath
+            shapeLayer.strokeColor = line.color.cgColor
+            shapeLayer.lineWidth = 1.0
+            shapeLayer.fillColor = UIColor.clear.cgColor
+            self.layer.addSublayer(shapeLayer)
+        }
+        
+    }
+}
+
 class FractalView: UIView, FinishMovingDelegate {
     
     var configurationView: ConfigurationView!
+    var fractalDrawingView: FractalDrawingView!
     
     var shapePoints: [CGPoint] = []
     
@@ -388,7 +437,7 @@ class FractalView: UIView, FinishMovingDelegate {
     var vectors: [FVector] = []
     
     var iterations = 1
-
+    
     var radius:CGFloat = 0.6
     
     var pathPoints: [CGPoint] = []
@@ -428,8 +477,10 @@ class FractalView: UIView, FinishMovingDelegate {
         super.init(frame: frame)
         
         configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: 400, height: 140))
-        configurationView.backgroundColor = UIColor.darkGray
         self.addSubview(configurationView)
+        
+        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: configurationView.frame.height, width: frame.width, height: frame.height - configurationView.frame.height))
+        self.addSubview(fractalDrawingView)
         
     }
     
@@ -444,8 +495,8 @@ class FractalView: UIView, FinishMovingDelegate {
     func setPolygonSideNumber(_ number: Int) {
         self.shapePoints.removeAll()
         
-        var center = self.center
-        center.y += configurationView.frame.height / 2
+        let center = fractalDrawingView.center
+        //center.y += configurationView.frame.height / 2
         
         let r = self.frame.height * self.radius / 2
         
@@ -455,7 +506,7 @@ class FractalView: UIView, FinishMovingDelegate {
             var point = CGPoint()
             let n = CGFloat(i)
             point.x = r * cos(2.0*pi*n/N) + center.x
-            point.y = r * sin(2.0*pi*n/N) + center.y
+            point.y = r * sin(2.0*pi*n/N) + center.y / 2.0
             self.shapePoints.append(point)
         }
         
@@ -466,30 +517,7 @@ class FractalView: UIView, FinishMovingDelegate {
         self.setNeedsDisplay()
     }
     
-    override func draw(_ rect: CGRect) {
-        
-        if (displayBasePolygon) { showBasicPolygon() }
-        
-        let context = UIGraphicsGetCurrentContext()
-        context?.clear(self.frame)
-        
-        
     
-        
-        for line in self.lines {
-            line.color.set()
-            line.path.lineWidth = 4.0
-            line.path.stroke()
-            
-            //let shapeLayer = CAShapeLayer()
-            //shapeLayer.path = line.path.cgPath
-            //shapeLayer.strokeColor = line.color.cgColor
-            //shapeLayer.lineWidth = 1.0
-            
-            //self.layer.addSublayer(shapeLayer)
-        }
-        
-    }
     
     func draw() {
         
@@ -509,7 +537,7 @@ class FractalView: UIView, FinishMovingDelegate {
                 self.startBezierCalculation(points: operation.pathPoints)
             }
         }
-
+        
         operation.qualityOfService = .background
         
         self.backgroundOperation = operation
@@ -523,8 +551,10 @@ class FractalView: UIView, FinishMovingDelegate {
             let operation = ProcessBezierPath(points: points)
             operation.completionBlock = {
                 DispatchQueue.main.async {
-                    self.lines = operation.lines
-                    self.setNeedsDisplay()
+                    //self.lines = operation.lines
+                    //self.setNeedsDisplay()
+                    self.fractalDrawingView.lines = operation.lines
+                    self.fractalDrawingView.setNeedsDisplay()
                 }
             }
             
@@ -571,40 +601,20 @@ class FractalView: UIView, FinishMovingDelegate {
         self.bezierPath = UIBezierPath()
         
         print("starting a new drawing")
-    
-    }
-}
-
-func getColor(hue: CGFloat) -> UIColor {
-    return UIColor(hue: hue, saturation: 0.5, brightness: 0.8, alpha: 1.0)
-}
-
-func setupColors() {
-    let colorStep:CGFloat = 1.0 / CGFloat(numberOfColors)
-    var t = colorStep
-    
-    for _ in 0..<numberOfColors {
-        t += colorStep
-        if t > 1 {
-            t = 0
-        }
         
-        colors.append(getColor(hue: t))
     }
 }
 
-setupColors()
 
+colors = setupColors(numberOfColors: numberOfColors)
 
 let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500))
 
-fractalView.displayBasePolygon = false
-
-fractalView.numberOfPoints = 5
+fractalView.numberOfPoints = 7
 
 fractalView.iterations = 3
 
-fractalView.polygonSides = 5
+fractalView.polygonSides = 3
 
 PlaygroundPage.current.liveView = fractalView
 PlaygroundPage.current.needsIndefiniteExecution = true
