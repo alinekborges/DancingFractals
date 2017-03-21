@@ -25,6 +25,7 @@ public class PointView: UIView, UIGestureRecognizerDelegate {
                                   y:view.center.y + translation.y)
         }
         recognizer.setTranslation(CGPoint.zero, in: self)
+        (superview as? FinishMovingDelegate)?.didFinishMoving()
         self.superview?.setNeedsDisplay()
     }
     

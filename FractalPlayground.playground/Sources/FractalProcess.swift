@@ -7,14 +7,19 @@ public class ProcessFractal: Operation {
     var pathPoints: [CGPoint] = []
     var iterations: Int = 1
     var vectors: [FVector] = []
-    var update: ((_ path: [CGPoint]) -> Void)?
     let operationQueue = OperationQueue()
+    
+    var colors:[UIColor] = []
+    
+    var lines: [[Line]] = []
     
     init(withTag tag: Int, points: [CGPoint], vectors: [FVector], iterations: Int) {
         self.pathPoints = points
         self.vectors = vectors
         self.iterations = iterations
         self.TAG = tag
+        
+        self.colors = Colors.generateColors(numberOfColors: Colors.numberOfColors)
     }
     
     override public func main() {
@@ -24,12 +29,14 @@ public class ProcessFractal: Operation {
             if (self.isCancelled) { break }
             
             self.drawSubpaths()
-            redraw()
+            redraw(points: self.pathPoints)
         }
     }
     
-    func redraw() {
-        self.update?(self.pathPoints)
+    func redraw(points: [CGPoint]) {
+        //self.update?(self.pathPoints)
+        let lines = pathFromPoints(points: points)
+        self.lines.append(lines)
     }
     
     override public func cancel() {
@@ -43,9 +50,8 @@ public class ProcessFractal: Operation {
             
             let subpoints = self.calculateMidPoints(start: i, end: i+1)
             if (self.isCancelled) { return }
-            //if (i+1 <= pathPoints.count+1) {
             self.pathPoints.insert(contentsOf: subpoints, at: i+1)
-            //}
+            
             
             i += subpoints.count + 1
         }
@@ -70,13 +76,41 @@ public class ProcessFractal: Operation {
         return points
     }
     
-    func pathFromPoints(points: [CGPoint]) -> UIBezierPath {
-        let bezierPath = UIBezierPath()
-        if (points.isEmpty) { return bezierPath }
-        bezierPath.move(to: points.first!)
-        for point in points {
-            bezierPath.addLine(to: point)
+    func pathFromPoints(points: [CGPoint]) -> [Line] {
+        let pointsPerColor = (points.count / Colors.numberOfColors) + 1
+        var color = 0
+        
+        var bpath = UIBezierPath()
+        bpath.move(to: points[0])
+        
+        var lines:[Line] = []
+        
+        for i in 0..<points.count {
+            if (self.isCancelled) { break }
+            bpath.addLine(to: points[i])
+            
+            if (i % pointsPerColor == 0) {
+                
+                let line = Line(path: bpath.copy() as! UIBezierPath,
+                                color: colors[color])
+                lines.append(line)
+                bpath = UIBezierPath()
+                
+                bpath.move(to: points[i])
+                
+                color += 1
+                if (color >= colors.count) {
+                    color = 0
+                }
+                
+            }
         }
-        return bezierPath
+        
+        
+        let line = Line(path: bpath.copy() as! UIBezierPath,
+                        color: colors[color])
+        lines.append(line)
+        
+        return lines
     }
 }

@@ -7,7 +7,7 @@ extension CGPoint {
     func distanceTo(_ point: CGPoint) -> CGFloat {
         let x = self.x - point.x
         let y = self.y - point.y
-        return sqrt(x*x+y*y)
+        return sqrt(x*x + y*y)
     }
     
     func angleTo(_ point: CGPoint) -> CGFloat {

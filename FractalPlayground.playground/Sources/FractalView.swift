@@ -50,13 +50,16 @@ public class FractalView: UIView, FinishMovingDelegate {
     }
     
     override public init(frame: CGRect) {
+        //let frame = UIScreen.main.bounds
         super.init(frame: frame)
+        configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: frame.width, height: 140))
         
-        configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: 400, height: 140))
-        self.addSubview(configurationView)
         
         fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: configurationView.frame.height, width: frame.width, height: frame.height - configurationView.frame.height))
+        
+        
         self.addSubview(fractalDrawingView)
+        self.addSubview(configurationView)
         
     }
     
@@ -99,19 +102,12 @@ public class FractalView: UIView, FinishMovingDelegate {
         
         let operation = ProcessFractal(withTag: self.runCount, points: self.pathPoints, vectors: self.vectors, iterations: self.iterations)
         
-        operation.update = {(path) in
-            DispatchQueue.main.async {
-                if (operation.TAG == self.runCount) {
-                    self.startBezierCalculation(points: path)
-                }
-            }
-        }
-        
         operation.completionBlock = {
             DispatchQueue.main.async {
-                self.bezierPathOperation.cancel()
-                self.startBezierCalculation(points: operation.pathPoints)
-                print("finish drawing")
+                self.fractalDrawingView.lines = operation.lines
+                //print("finish drawing")
+               // self.fractalDrawingView.draw()
+                self.fractalDrawingView.setNeedsDisplay()
             }
         }
         
@@ -121,22 +117,6 @@ public class FractalView: UIView, FinishMovingDelegate {
         
         operationQueue.addOperation(operation)
         
-    }
-    
-    func startBezierCalculation(points: [CGPoint]) {
-        if (!self.bezierPathOperation.isExecuting) {
-            let operation = ProcessBezierPath(points: points)
-            operation.completionBlock = {
-                DispatchQueue.main.async {
-                    //self.lines = operation.lines
-                    //self.setNeedsDisplay()
-                    self.fractalDrawingView.lines.append(operation.lines)
-                    //self.fractalDrawingView.setNeedsDisplay()
-                }
-            }
-            
-            operationQueue.addOperation(operation)
-        }
     }
     
     func generateVectors() {
@@ -178,7 +158,8 @@ public class FractalView: UIView, FinishMovingDelegate {
         
         self.bezierPath = UIBezierPath()
         
-        print("starting a new drawing")
-        
+        //print("starting a new drawing")
     }
+    
+    
 }

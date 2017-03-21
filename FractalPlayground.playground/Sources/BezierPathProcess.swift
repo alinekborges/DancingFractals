@@ -21,8 +21,6 @@ public class ProcessBezierPath: Operation {
             return
         }
         
-        
-        
         if self.points.isEmpty { return }
         
         iterateBetween(i: 0, max: self.points.count)

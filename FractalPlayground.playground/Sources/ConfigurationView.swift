@@ -46,6 +46,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         }
         
         mainPoints[1].center.y -= 50
+        //mainPoints[1].center.x += 50
+        
+        //mainPoints[4].center.y += 50
+        //mainPoints[4].center.x -= 50
         
         //let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
         //button.backgroundColor = .yellow
