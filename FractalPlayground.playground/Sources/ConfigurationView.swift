@@ -13,9 +13,18 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     var colors: [UIColor] = []
     
+    var iterationsView: IterationsView?
+    
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .black
+        self.backgroundColor = .clear
+        
+        iterationsView = IterationsView()
+        iterationsView?.frame.size = CGSize(width: frame.width, height: 26.0)
+        iterationsView?.frame.origin = CGPoint(x: 0.0, y: frame.height - 45.0)
+        iterationsView?.setupButtons()
+        
+        self.addSubview(iterationsView!)
         
     }
     
@@ -29,8 +38,6 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         mainPoints.removeAll()
         
-        let center = self.center
-        
         let begin = self.frame.width * margin
         let end = self.frame.width - begin
         
@@ -40,22 +47,13 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         for i in 0..<count {
             let centerX = begin + step * CGFloat(i)
-            let view = PointView(center: CGPoint(x: centerX, y: center.y), color: colors[i*2])
+            let centerY:CGFloat = 80.0
+            let view = PointView(center: CGPoint(x: centerX, y: centerY), color: colors[i*2])
             mainPoints.append(view)
             self.addSubview(view)
         }
         
         mainPoints[1].center.y -= 50
-        //mainPoints[1].center.x += 50
-        
-        //mainPoints[4].center.y += 50
-        //mainPoints[4].center.x -= 50
-        
-        //let button = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
-        //button.backgroundColor = .yellow
-        
-        //button.addTarget(self, action: #selector(self.redraw(view:)), for: .touchUpInside)
-        //self.addSubview(button)
         
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
@@ -65,16 +63,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         (superview as? FinishMovingDelegate)?.didFinishMoving()
     }
     
-    func redraw(view: AnyObject?) {
-        (superview as? FinishMovingDelegate)?.didFinishMoving()
-    }
-    
     
     override public func draw(_ rect: CGRect) {
         
         if (mainPoints.isEmpty) { return }
-        
-        
         
         for i in 1..<mainPoints.count {
             let bezierPath = UIBezierPath()
@@ -84,8 +76,6 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             colors[i*2 - 1].set()
             bezierPath.stroke()
         }
-        
-        
     }
     
     func setPosition(x: CGFloat, y: CGFloat, forPoint point: PointView) {

@@ -7,9 +7,11 @@ public class FractalDrawingView: UIView {
     var oldLines: [Line] = []
     var newLines: [Line] = []
     
+    var iteration: Int = 0
+    
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        self.clipsToBounds = true
+        //self.clipsToBounds = true
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -39,32 +41,16 @@ public class FractalDrawingView: UIView {
     
     override public func draw(_ rect: CGRect) {
         
-        //if (displayBasePolygon) { showBasicPolygon() }
-        
-        let context = UIGraphicsGetCurrentContext()
-        
-        context?.clear(self.frame)
-        
-        //print("Draw Fractal: \(lines.count)")
-        
-        layer.sublayers?.forEach { $0.removeFromSuperlayer() }
      
-        /*for lines in self.lines {
-            for line in lines {
-                let shapeLayer = CAShapeLayer()
-                shapeLayer.path = line.path.cgPath
-                shapeLayer.strokeColor = line.color.cgColor
-                shapeLayer.lineWidth = 1.0
-                shapeLayer.fillColor = UIColor.clear.cgColor
-                self.layer.addSublayer(shapeLayer)
-            }
-        }*/
-        
         if (lines.isEmpty) { return }
         
-        let oldLines = lines[0]
+        layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         
-        let newLines = lines.last!
+        print("lines count: \(lines.count)")
+        print("iteration: \(iteration)")
+        
+        let newLines = lines[iteration]
+        
         
         for i in 0..<newLines.count {
             let shapeLayer = CAShapeLayer()
@@ -79,7 +65,7 @@ public class FractalDrawingView: UIView {
             
         }
         
-        self.setNeedsDisplay()
+        
         
     }
 }

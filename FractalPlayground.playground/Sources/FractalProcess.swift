@@ -25,9 +25,11 @@ public class ProcessFractal: Operation {
     override public func main() {
         if self.isCancelled { return }
         
+        redraw(points: self.pathPoints)
+        
+        
         for _ in 0..<iterations {
             if (self.isCancelled) { break }
-            
             self.drawSubpaths()
             redraw(points: self.pathPoints)
         }

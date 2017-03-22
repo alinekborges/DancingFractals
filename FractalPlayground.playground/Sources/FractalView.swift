@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-public class FractalView: UIView, FinishMovingDelegate {
+public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     var configurationView: ConfigurationView!
     var fractalDrawingView: FractalDrawingView!
@@ -12,7 +12,7 @@ public class FractalView: UIView, FinishMovingDelegate {
     
     var vectors: [FVector] = []
     
-    public var iterations = 1
+    public var iterations = Constants.maxIterations
     
     public var radius:CGFloat = 0.6
     
@@ -52,11 +52,12 @@ public class FractalView: UIView, FinishMovingDelegate {
     override public init(frame: CGRect) {
         //let frame = UIScreen.main.bounds
         super.init(frame: frame)
-        configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: frame.width, height: 140))
+        configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
         
         
-        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: configurationView.frame.height, width: frame.width, height: frame.height - configurationView.frame.height))
+        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: frame.height*0.2, width: frame.width, height: frame.height*0.8))
         
+        configurationView.iterationsView?.delegate = self
         
         self.addSubview(fractalDrawingView)
         self.addSubview(configurationView)
@@ -142,6 +143,11 @@ public class FractalView: UIView, FinishMovingDelegate {
     
     public func didFinishMoving() {
         reset()
+    }
+    
+    public func didSetIteration(_ iteration: Int) {
+        fractalDrawingView.iteration = iteration
+        fractalDrawingView.setNeedsDisplay()
     }
     
     public func reset() {
