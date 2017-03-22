@@ -1,15 +1,15 @@
 import Foundation
 import UIKit
 
-public protocol FinishMovingDelegate {
-    func didFinishMoving()
-}
+
 
 public class ConfigurationView: UIView, FinishMovingDelegate {
     
     var mainPoints: [PointView] = []
     
     let margin:CGFloat = 0
+    
+    var movingPoint: PointView?
     
     var colors: [UIColor] = []
     
@@ -32,6 +32,46 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch: UITouch = touches.first! as UITouch
+        let location: CGPoint = touch.location(in: self)
+        
+        for point in self.mainPoints {
+            if (point.frame.contains(location)) {
+                point.center = location
+                self.movingPoint = point
+                self.setNeedsDisplay()
+                break
+            }
+        }
+    }
+    
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if (movingPoint != nil) {
+        let touch: UITouch = touches.first! as UITouch
+        let location: CGPoint = touch.location(in: self)
+        
+        self.movingPoint?.center = location
+        
+        didChangeMove()
+        self.setNeedsDisplay()
+        }
+        
+    }
+    
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if (movingPoint != nil) {
+        let touch: UITouch = touches.first! as UITouch
+        let location: CGPoint = touch.location(in: self)
+        
+        self.movingPoint?.center = location
+        self.movingPoint = nil
+        
+        didFinishMoving()
+        self.setNeedsDisplay()
+        }
+    }
     
     func setNumberOfPoints(_ count: Int) {
         if (count < 2) { return }
@@ -61,6 +101,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     public func didFinishMoving() {
         (superview as? FinishMovingDelegate)?.didFinishMoving()
+    }
+    
+    public func didChangeMove() {
+        (superview as? FinishMovingDelegate)?.didChangeMove()
     }
     
     

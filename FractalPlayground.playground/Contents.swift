@@ -10,11 +10,12 @@ let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 500)
 
 fractalView.radius = 0.5
 
-fractalView.numberOfPoints = 7
 
-fractalView.polygonSides = 5
+fractalView.numberOfPoints = 6
 
-fractalView.reset()
+fractalView.polygonSides = 4
+
+//fractalView.reset()     
 
 PlaygroundPage.current.liveView = fractalView
 PlaygroundPage.current.needsIndefiniteExecution = true

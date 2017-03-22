@@ -28,7 +28,7 @@ public class ProcessFractal: Operation {
         redraw(points: self.pathPoints)
         
         
-        for _ in 0..<iterations {
+        for _ in 0...iterations {
             if (self.isCancelled) { break }
             self.drawSubpaths()
             redraw(points: self.pathPoints)
@@ -36,7 +36,6 @@ public class ProcessFractal: Operation {
     }
     
     func redraw(points: [CGPoint]) {
-        //self.update?(self.pathPoints)
         let lines = pathFromPoints(points: points)
         self.lines.append(lines)
     }

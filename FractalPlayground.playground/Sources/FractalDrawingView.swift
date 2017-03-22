@@ -9,6 +9,8 @@ public class FractalDrawingView: UIView {
     
     var iteration: Int = 0
     
+    var points: [CGPoint] = []
+    
     override public init(frame: CGRect) {
         super.init(frame: frame)
         //self.clipsToBounds = true
@@ -49,6 +51,9 @@ public class FractalDrawingView: UIView {
         print("lines count: \(lines.count)")
         print("iteration: \(iteration)")
         
+        if (iteration >= lines.count) {
+            iteration = lines.count - 1
+        }
         let newLines = lines[iteration]
         
         

@@ -13,6 +13,8 @@ public class IterationsView: UIView {
     
     var delegate: IterationsDelegate?
 
+    var iteration: Int = 4
+    
     public init() {
         
         super.init(frame: CGRect.zero)
@@ -45,6 +47,7 @@ public class IterationsView: UIView {
     }
     
     func onClick(button: UIButton) {
+        self.iteration = button.tag
         delegate?.didSetIteration(button.tag)
     }
 }

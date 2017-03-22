@@ -12,8 +12,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     var vectors: [FVector] = []
     
-    public var iterations = Constants.maxIterations
-    
     public var radius:CGFloat = 0.6
     
     var pathPoints: [CGPoint] = []
@@ -21,6 +19,8 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     var runningCalculations = false
     
     var runCount: Int = 0
+    
+    var iteration: Int = 0
     
     var backgroundOperation: ProcessFractal?
     
@@ -55,7 +55,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
         
         
-        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: frame.height*0.2, width: frame.width, height: frame.height*0.8))
+        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: frame.height*0.3, width: frame.width, height: frame.height*0.7))
         
         configurationView.iterationsView?.delegate = self
         
@@ -92,23 +92,38 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         
         shapePoints.append(shapePoints.first!)
         
-        reset()
-        
-        self.setNeedsDisplay()
     }
     
-    
-    
-    func draw() {
+    func draw(isMoving: Bool) {
         
-        let operation = ProcessFractal(withTag: self.runCount, points: self.pathPoints, vectors: self.vectors, iterations: self.iterations)
+        var iterations = self.iteration
+        var points = self.pathPoints
+        
+        if (isMoving && iterations > Constants.movingIterations ) {
+            iterations = Constants.movingIterations
+        } else if (isMoving == false) {
+            iterations = Constants.maxIterations - self.fractalDrawingView.lines.count
+            points = self.fractalDrawingView.points
+        }
+        
+        fractalDrawingView.iteration = iteration
+    
+        
+        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iterations)
         
         operation.completionBlock = {
             DispatchQueue.main.async {
-                self.fractalDrawingView.lines = operation.lines
-                //print("finish drawing")
-               // self.fractalDrawingView.draw()
-                self.fractalDrawingView.setNeedsDisplay()
+                if (isMoving) {
+                    self.fractalDrawingView.lines = operation.lines
+                    self.fractalDrawingView.points = operation.pathPoints
+                    self.fractalDrawingView.iteration = self.iteration
+                    self.fractalDrawingView.setNeedsDisplay()
+                } else {
+                    self.fractalDrawingView.lines.append(contentsOf: operation.lines)
+                    self.fractalDrawingView.points = operation.pathPoints
+                    self.fractalDrawingView.iteration = self.iteration
+                    print("fractal view completed all iterations -- line count: \(self.fractalDrawingView.lines.count)")
+                }
             }
         }
         
@@ -142,15 +157,21 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     }
     
     public func didFinishMoving() {
-        reset()
+        print("finish Moving 2")
+        draw(isMoving: false)
+    }
+    
+    public func didChangeMove() {
+        reset(isMoving: true)
     }
     
     public func didSetIteration(_ iteration: Int) {
+        self.iteration = iteration
         fractalDrawingView.iteration = iteration
         fractalDrawingView.setNeedsDisplay()
     }
     
-    public func reset() {
+    public func reset(isMoving: Bool = false) {
         
         self.runCount += 1
         
@@ -160,7 +181,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         self.pathPoints = shapePoints
         generateVectors()
         
-        draw()
+        draw(isMoving: isMoving)
         
         self.bezierPath = UIBezierPath()
         
