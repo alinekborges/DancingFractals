@@ -48,12 +48,14 @@ public class FractalDrawingView: UIView {
         
         layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         
-        print("lines count: \(lines.count)")
-        print("iteration: \(iteration)")
+        //print("lines count: \(lines.count)")
+        //print("iteration: \(iteration)")
         
         if (iteration >= lines.count) {
             iteration = lines.count - 1
         }
+        
+        
         let newLines = lines[iteration]
         
         
@@ -61,7 +63,8 @@ public class FractalDrawingView: UIView {
             let shapeLayer = CAShapeLayer()
             //let animation = animateBetween(oldPath: oldLines[i].path, newPath: newLines[i].path)
             shapeLayer.path = newLines[i].path.cgPath
-            shapeLayer.strokeColor = newLines[i].color.withAlphaComponent(1.0).cgColor
+            
+            shapeLayer.strokeColor = newLines[i].color.cgColor
             shapeLayer.lineWidth = 1.0
             shapeLayer.fillColor = UIColor.clear.cgColor
             self.layer.addSublayer(shapeLayer)

@@ -20,29 +20,8 @@ public class PointView: UIView, UIGestureRecognizerDelegate {
         subpoint.center = CGPoint(x: 13.0, y: 13.0)
         subpoint.backgroundColor = color
         subpoint.layer.cornerRadius = subpoint.frame.height/2
-        print("subpoint center: \(subpoint.center)")
         self.addSubview(subpoint)
         
-        //let gesture = UIPanGestureRecognizer(target: self, action:#selector(self.handleGesture(recognizer:)))
-        //self.addGestureRecognizer(gesture)
-        
-    }
-    
-    func handleGesture(recognizer:UIPanGestureRecognizer) {
-        if (recognizer.state == .ended || recognizer.state == .cancelled) {
-            
-            print("finish Moving 0")
-            (superview as? FinishMovingDelegate)?.didFinishMoving()
-        }
-        let translation = recognizer.translation(in: self)
-        if let view = recognizer.view {
-            view.center = CGPoint(x:view.center.x + translation.x,
-                                  y:view.center.y + translation.y)
-        }
-        recognizer.setTranslation(CGPoint.zero, in: self)
-        (superview as? FinishMovingDelegate)?.didChangeMove()
-        
-        self.superview?.setNeedsDisplay()
     }
     
     required public init?(coder aDecoder: NSCoder) {

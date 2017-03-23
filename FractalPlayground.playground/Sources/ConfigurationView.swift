@@ -7,7 +7,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     var mainPoints: [PointView] = []
     
-    let margin:CGFloat = 0
+    let margin:CGFloat = 0.25
     
     var movingPoint: PointView?
     
@@ -20,7 +20,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         self.backgroundColor = .clear
         
         iterationsView = IterationsView()
-        iterationsView?.frame.size = CGSize(width: frame.width, height: 26.0)
+        iterationsView?.frame.size = CGSize(width: frame.width, height: 30.0)
         iterationsView?.frame.origin = CGPoint(x: 0.0, y: frame.height - 45.0)
         iterationsView?.setupButtons()
         

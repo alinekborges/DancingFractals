@@ -18,17 +18,18 @@ public class ProcessFractal: Operation {
         self.vectors = vectors
         self.iterations = iterations
         self.TAG = tag
-        
         self.colors = Colors.generateColors(numberOfColors: Colors.numberOfColors)
     }
     
     override public func main() {
         if self.isCancelled { return }
         
+        //print("hey: \(pathPoints.count)")
         redraw(points: self.pathPoints)
         
         
-        for _ in 0...iterations {
+        
+        for _ in 0..<iterations {
             if (self.isCancelled) { break }
             self.drawSubpaths()
             redraw(points: self.pathPoints)

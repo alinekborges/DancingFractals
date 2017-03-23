@@ -8,19 +8,17 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     var shapePoints: [CGPoint] = []
     
-    var bezierPath = UIBezierPath()
-    
     var vectors: [FVector] = []
     
     public var radius:CGFloat = 0.6
     
-    var pathPoints: [CGPoint] = []
+    //var pathPoints: [CGPoint] = []
     
     var runningCalculations = false
     
     var runCount: Int = 0
     
-    var iteration: Int = 0
+    var iteration: Int = Constants.initialIterations
     
     var backgroundOperation: ProcessFractal?
     
@@ -94,10 +92,34 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         
     }
     
+    func firstDraw() {
+        let points = self.shapePoints
+        
+        fractalDrawingView.iteration = iteration
+        
+        //print("pathpoints to FIRST draw: \(self.shapePoints.count)")
+        
+        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iteration)
+        
+        operation.completionBlock = {
+            DispatchQueue.main.async {
+                self.fractalDrawingView.lines.append(contentsOf: operation.lines)
+                self.fractalDrawingView.points = operation.pathPoints
+                self.fractalDrawingView.iteration = self.iteration
+                self.draw(isMoving: false)
+                self.fractalDrawingView.setNeedsDisplay()
+            }
+        }
+        
+        self.backgroundOperation = operation
+        
+        operationQueue.addOperation(operation)
+    }
+    
     func draw(isMoving: Bool) {
         
         var iterations = self.iteration
-        var points = self.pathPoints
+        var points = self.shapePoints
         
         if (isMoving && iterations > Constants.movingIterations ) {
             iterations = Constants.movingIterations
@@ -106,9 +128,9 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
             points = self.fractalDrawingView.points
         }
         
+        //print("iteration to draw: \(iterations)")
         fractalDrawingView.iteration = iteration
     
-        
         let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iterations)
         
         operation.completionBlock = {
@@ -116,12 +138,13 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
                 if (isMoving) {
                     self.fractalDrawingView.lines = operation.lines
                     self.fractalDrawingView.points = operation.pathPoints
-                    self.fractalDrawingView.iteration = self.iteration
                     self.fractalDrawingView.setNeedsDisplay()
                 } else {
+                    operation.lines.removeFirst()
                     self.fractalDrawingView.lines.append(contentsOf: operation.lines)
                     self.fractalDrawingView.points = operation.pathPoints
                     self.fractalDrawingView.iteration = self.iteration
+                    self.fractalDrawingView.setNeedsDisplay()
                     print("fractal view completed all iterations -- line count: \(self.fractalDrawingView.lines.count)")
                 }
             }
@@ -171,21 +194,23 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         fractalDrawingView.setNeedsDisplay()
     }
     
-    public func reset(isMoving: Bool = false) {
+    public func start() {
+        generateVectors()
+        firstDraw()
+    }
+    
+    public func reset(isMoving: Bool) {
         
         self.runCount += 1
         
         backgroundOperation?.cancel()
         fractalDrawingView.lines.removeAll()
         
-        self.pathPoints = shapePoints
+        //self.pathPoints = shapePoints
         generateVectors()
         
         draw(isMoving: isMoving)
         
-        self.bezierPath = UIBezierPath()
-        
-        //print("starting a new drawing")
     }
     
     
