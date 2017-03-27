@@ -20,17 +20,11 @@ public class FractalDrawingView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func draw() {
-        
-        self.setNeedsDisplay()
-        
-    }
-    
     func animateBetween(oldPath: UIBezierPath, newPath: UIBezierPath) -> CABasicAnimation {
         let myAnimation = CABasicAnimation(keyPath: "path")
         
-        myAnimation.fromValue = oldPath
-        myAnimation.toValue = newPath
+        myAnimation.fromValue = oldPath.cgPath
+        myAnimation.toValue = newPath.cgPath
         
         myAnimation.duration = 1.0
         myAnimation.fillMode = kCAFillModeForwards
@@ -41,15 +35,14 @@ public class FractalDrawingView: UIView {
         //self.layer.mask.addAnimation(myAnimation, forKey: "animatePath")
     }
     
-    override public func draw(_ rect: CGRect) {
-        
+    public func draw(animated: Bool = false) {
      
         if (lines.isEmpty) { return }
         
         layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         
-        //print("lines count: \(lines.count)")
-        //print("iteration: \(iteration)")
+        print("lines count: \(lines.count)")
+        print("iteration: \(iteration)")
         
         if (iteration >= lines.count) {
             iteration = lines.count - 1
@@ -58,22 +51,26 @@ public class FractalDrawingView: UIView {
         
         let newLines = lines[iteration]
         
-        
         for i in 0..<newLines.count {
             let shapeLayer = CAShapeLayer()
-            //let animation = animateBetween(oldPath: oldLines[i].path, newPath: newLines[i].path)
+            
             shapeLayer.path = newLines[i].path.cgPath
             
             shapeLayer.strokeColor = newLines[i].color.cgColor
-            shapeLayer.lineWidth = 1.0
+            shapeLayer.lineWidth = 2.0
             shapeLayer.fillColor = UIColor.clear.cgColor
             self.layer.addSublayer(shapeLayer)
             
-            //shapeLayer.add(animation, forKey: "path")
+            if (animated && newLines.count == oldLines.count) {
+                let animation = animateBetween(oldPath: oldLines[i].path, newPath: newLines[i].path)
+                shapeLayer.add(animation, forKey: "\(i)")
+            }
             
         }
         
+        oldLines = newLines
         
+        self.setNeedsDisplay()
         
     }
 }

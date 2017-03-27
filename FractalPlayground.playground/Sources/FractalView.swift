@@ -6,13 +6,13 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     var configurationView: ConfigurationView!
     var fractalDrawingView: FractalDrawingView!
     
+    var orientarion: UIInterfaceOrientation!
+    
     var shapePoints: [CGPoint] = []
     
     var vectors: [FVector] = []
     
     public var radius:CGFloat = 0.6
-    
-    //var pathPoints: [CGPoint] = []
     
     var runningCalculations = false
     
@@ -28,6 +28,16 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     var lines: [Line] = []
     var oldLines: [Line] = []
+    
+    override public var bounds: CGRect {
+        didSet {
+            if bounds.width > bounds.height {
+                self.orientarion = UIInterfaceOrientation.landscapeLeft
+            } else {
+                self.orientarion = UIInterfaceOrientation.portrait
+            }
+        }
+    }
     
     var displayBasePolygon = false {
         didSet {
@@ -107,7 +117,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
                 self.fractalDrawingView.points = operation.pathPoints
                 self.fractalDrawingView.iteration = self.iteration
                 self.draw(isMoving: false)
-                self.fractalDrawingView.setNeedsDisplay()
+                self.fractalDrawingView.draw()
             }
         }
         
@@ -131,20 +141,23 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         //print("iteration to draw: \(iterations)")
         fractalDrawingView.iteration = iteration
     
+        self.runCount += 1
         let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iterations)
+        
         
         operation.completionBlock = {
             DispatchQueue.main.async {
+                if (operation.TAG != self.runCount) { return }
                 if (isMoving) {
                     self.fractalDrawingView.lines = operation.lines
                     self.fractalDrawingView.points = operation.pathPoints
-                    self.fractalDrawingView.setNeedsDisplay()
+                    self.fractalDrawingView.draw()
                 } else {
                     operation.lines.removeFirst()
                     self.fractalDrawingView.lines.append(contentsOf: operation.lines)
                     self.fractalDrawingView.points = operation.pathPoints
                     self.fractalDrawingView.iteration = self.iteration
-                    self.fractalDrawingView.setNeedsDisplay()
+                    self.fractalDrawingView.draw()
                     print("fractal view completed all iterations -- line count: \(self.fractalDrawingView.lines.count)")
                 }
             }
@@ -191,7 +204,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     public func didSetIteration(_ iteration: Int) {
         self.iteration = iteration
         fractalDrawingView.iteration = iteration
-        fractalDrawingView.setNeedsDisplay()
+        fractalDrawingView.draw(animated: false)
     }
     
     public func start() {
@@ -199,9 +212,11 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         firstDraw()
     }
     
-    public func reset(isMoving: Bool) {
+    func setOrientation(orientation: UIInterfaceOrientation) {
         
-        self.runCount += 1
+    }
+    
+    public func reset(isMoving: Bool) {
         
         backgroundOperation?.cancel()
         fractalDrawingView.lines.removeAll()

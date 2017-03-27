@@ -21,8 +21,13 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         iterationsView = IterationsView()
         iterationsView?.frame.size = CGSize(width: frame.width, height: 30.0)
-        iterationsView?.frame.origin = CGPoint(x: 0.0, y: frame.height - 45.0)
+        iterationsView?.frame.origin = CGPoint(x: 0.0, y: 10.0)
         iterationsView?.setupButtons()
+        
+        //let subview = UIView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: 160.0))
+            //subview.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        
+        //self.addSubview(subview)
         
         self.addSubview(iterationsView!)
         
@@ -87,7 +92,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         for i in 0..<count {
             let centerX = begin + step * CGFloat(i)
-            let centerY:CGFloat = 80.0
+            let centerY:CGFloat = 100.0
             let view = PointView(center: CGPoint(x: centerX, y: centerY), color: colors[i*2])
             mainPoints.append(view)
             self.addSubview(view)
@@ -106,7 +111,6 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     public func didChangeMove() {
         (superview as? FinishMovingDelegate)?.didChangeMove()
     }
-    
     
     override public func draw(_ rect: CGRect) {
         
