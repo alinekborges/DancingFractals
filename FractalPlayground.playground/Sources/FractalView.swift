@@ -6,7 +6,11 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     var configurationView: ConfigurationView!
     var fractalDrawingView: FractalDrawingView!
     
-    var orientarion: UIInterfaceOrientation!
+    var orientation: UIInterfaceOrientation! {
+        didSet {
+            setupOrientation(orientation: orientation)
+        }
+    }
     
     var shapePoints: [CGPoint] = []
     
@@ -31,11 +35,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     override public var bounds: CGRect {
         didSet {
-            if bounds.width > bounds.height {
-                self.orientarion = UIInterfaceOrientation.landscapeLeft
-            } else {
-                self.orientarion = UIInterfaceOrientation.portrait
-            }
+            setOrientationFromBounds(bounds: bounds)
         }
     }
     
@@ -45,17 +45,9 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         }
     }
     
-    public var numberOfPoints:Int = 4 {
-        didSet {
-            setupNumberOfPoints(numberOfPoints)
-        }
-    }
+    public var numberOfPoints:Int = 4
     
-    public var polygonSides:Int = 4 {
-        didSet {
-            setPolygonSideNumber(polygonSides)
-        }
-    }
+    public var polygonSides:Int = 4
     
     override public init(frame: CGRect) {
         //let frame = UIScreen.main.bounds
@@ -70,6 +62,8 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         self.addSubview(fractalDrawingView)
         self.addSubview(configurationView)
         
+        setOrientationFromBounds(bounds: self.bounds)
+        
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -81,12 +75,19 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     }
     
     func setPolygonSideNumber(_ number: Int) {
+        
+        print("polygon calcularion:::::::::::: \(number)")
         self.shapePoints.removeAll()
         
-        let center = fractalDrawingView.center
-        //center.y += configurationView.frame.height / 2
+        var center = fractalDrawingView.center
         
-        let r = self.frame.height * self.radius / 2
+        if (self.orientation == .portrait) {
+            center.y /= 2.0
+        } else {
+            center.x /= 2.0
+        }
+        
+        let r = self.fractalDrawingView.frame.height * self.radius / 2
         
         let pi = CGFloat(M_PI)
         let N = CGFloat(number)
@@ -94,7 +95,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
             var point = CGPoint()
             let n = CGFloat(i)
             point.x = r * cos(2.0*pi*n/N) + center.x
-            point.y = r * sin(2.0*pi*n/N) + center.y / 2.0
+            point.y = r * sin(2.0*pi*n/N) + center.y
             self.shapePoints.append(point)
         }
         
@@ -107,17 +108,15 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         
         fractalDrawingView.iteration = iteration
         
-        //print("pathpoints to FIRST draw: \(self.shapePoints.count)")
-        
-        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iteration)
+        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: Constants.maxIterations)
         
         operation.completionBlock = {
             DispatchQueue.main.async {
                 self.fractalDrawingView.lines.append(contentsOf: operation.lines)
                 self.fractalDrawingView.points = operation.pathPoints
                 self.fractalDrawingView.iteration = self.iteration
-                self.draw(isMoving: false)
                 self.fractalDrawingView.draw()
+                print("hey first draw")
             }
         }
         
@@ -138,7 +137,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
             points = self.fractalDrawingView.points
         }
         
-        //print("iteration to draw: \(iterations)")
         fractalDrawingView.iteration = iteration
     
         self.runCount += 1
@@ -208,11 +206,13 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     }
     
     public func start() {
+        backgroundOperation?.cancel()
+        fractalDrawingView.lines.removeAll()
+        setupNumberOfPoints(numberOfPoints)
+        setPolygonSideNumber(polygonSides)
+        
         generateVectors()
         firstDraw()
-    }
-    
-    func setOrientation(orientation: UIInterfaceOrientation) {
         
     }
     
@@ -221,11 +221,57 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         backgroundOperation?.cancel()
         fractalDrawingView.lines.removeAll()
         
-        //self.pathPoints = shapePoints
         generateVectors()
         
         draw(isMoving: isMoving)
         
+    }
+    
+    private func setupOrientation(orientation: UIInterfaceOrientation) {
+        
+        print("SETUP ORIENTATION::::: \(orientation)")
+        
+        if (orientation == .portrait) {
+            self.configurationView.frame =  CGRect(x: 0, y: 0, width: self.frame.width , height: self.frame.height * 0.28)
+            
+            self.fractalDrawingView.frame = CGRect(
+                origin: CGPoint(
+                    x: 0,
+                    y: self.configurationView.frame.height),
+                size: CGSize(
+                    width: self.frame.width,
+                    height: self.frame.height -
+                        self.configurationView.frame.height))
+            
+        } else {
+            self.configurationView.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: self.frame.width * 0.35, height: self.frame.height))
+            
+            self.fractalDrawingView.frame = CGRect(
+                origin: CGPoint(
+                    x: self.configurationView.frame.width,
+                    y: 0),
+                size: CGSize(
+                    width: self.frame.width - self.configurationView.frame.width,
+                    height: self.frame.height))
+            
+            
+        }
+        
+        self.configurationView.setOrientation(orientation: orientation)
+        self.setNeedsLayout()
+        
+        if (runCount > 0) {
+            self.start()
+        }
+        
+    }
+    
+    private func setOrientationFromBounds(bounds: CGRect) {
+        if bounds.width > bounds.height {
+            self.orientation = UIInterfaceOrientation.landscapeLeft
+        } else {
+            self.orientation = UIInterfaceOrientation.portrait
+        }
     }
     
     

@@ -32,6 +32,12 @@ public class IterationsView: UIView {
     
     public func setupButtons() {
         
+        for b in buttons {
+            b.removeFromSuperview()
+        }
+        
+        buttons.removeAll()
+        
         let size = self.frame.height
         let leftSize = self.frame.width - CGFloat(Constants.maxIterations) * size
         let spacing = leftSize / CGFloat(Constants.maxIterations + 1)

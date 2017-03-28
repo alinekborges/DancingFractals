@@ -13,6 +13,7 @@ public class FractalDrawingView: UIView {
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
+        self.backgroundColor = .clear
         //self.clipsToBounds = true
     }
     
@@ -48,14 +49,12 @@ public class FractalDrawingView: UIView {
             iteration = lines.count - 1
         }
         
-        
         let newLines = lines[iteration]
         
         for i in 0..<newLines.count {
             let shapeLayer = CAShapeLayer()
             
             shapeLayer.path = newLines[i].path.cgPath
-            
             shapeLayer.strokeColor = newLines[i].color.cgColor
             shapeLayer.lineWidth = 2.0
             shapeLayer.fillColor = UIColor.clear.cgColor
