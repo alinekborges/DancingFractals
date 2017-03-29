@@ -108,7 +108,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             self.addSubview(view)
         }
         
-        mainPoints[1].center.y -= 25
+        mainPoints[1].center.y -= 45
         
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
