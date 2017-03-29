@@ -23,7 +23,7 @@ public class IterationsView: UIView {
         
         colors = Colors.generateColors(numberOfColors: Constants.maxIterations * 2)
         self.clipsToBounds = false
-        self.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        self.backgroundColor = .clear
     }
     
     required public init?(coder aDecoder: NSCoder) {

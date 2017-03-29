@@ -218,7 +218,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     public func reset(isMoving: Bool) {
         
-        backgroundOperation?.cancel()
         fractalDrawingView.lines.removeAll()
         
         generateVectors()
@@ -228,8 +227,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     }
     
     private func setupOrientation(orientation: UIInterfaceOrientation) {
-        
-        print("SETUP ORIENTATION::::: \(orientation)")
         
         if (orientation == .portrait) {
             self.configurationView.frame =  CGRect(x: 0, y: 0, width: self.frame.width , height: self.frame.height * 0.28)

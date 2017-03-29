@@ -14,7 +14,6 @@ public class FractalDrawingView: UIView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .clear
-        //self.clipsToBounds = true
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -26,6 +25,7 @@ public class FractalDrawingView: UIView {
         
         myAnimation.fromValue = oldPath.cgPath
         myAnimation.toValue = newPath.cgPath
+        
         
         myAnimation.duration = 1.0
         myAnimation.fillMode = kCAFillModeForwards

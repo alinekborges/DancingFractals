@@ -19,11 +19,17 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .clear
+        
+        self.backgroundColor = UIColor(white: 0.02, alpha: 0.7)
         
         iterationsView = IterationsView()
         self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 10.0), size: CGSize(width: self.frame.width, height: 30.0))
         iterationsView?.setupButtons()
+        
+        self.frame = self.frame.insetBy(dx: -2.0, dy: -2.0);
+        self.layer.borderWidth = 2.0
+        self.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor
+        
         
         self.addSubview(iterationsView!)
         
@@ -50,13 +56,17 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         
         if (movingPoint != nil) {
-        let touch: UITouch = touches.first! as UITouch
-        let location: CGPoint = touch.location(in: self)
+            let touch: UITouch = touches.first! as UITouch
+            let location: CGPoint = touch.location(in: self)
+            
+            if (self.frame.contains(location)) {
+                self.movingPoint?.center = location
+                
+                didChangeMove()
+                self.setNeedsDisplay()
+            }
         
-        self.movingPoint?.center = location
-        
-        didChangeMove()
-        self.setNeedsDisplay()
+            
         }
         
     }
