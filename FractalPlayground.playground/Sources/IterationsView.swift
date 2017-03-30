@@ -13,7 +13,7 @@ public class IterationsView: UIView {
     
     var delegate: IterationsDelegate?
 
-    var iteration: Int = 4
+    var iteration: Int = Constants.initialIterations
     
     var colors: [UIColor] = []
     
@@ -52,7 +52,7 @@ public class IterationsView: UIView {
             origin.x += spacing + size
         }
         
-        selectPosition(position: Constants.initialIterations)
+        selectPosition(position: self.iteration)
     }
     
     func createButton(iteration: Int) -> UIButton {
@@ -76,7 +76,18 @@ public class IterationsView: UIView {
         return button
     }
     
+    func selectNextIteration() {
+        var p = self.iteration + 1
+        if p >= Constants.maxIterations {
+            p = 0
+        }
+        
+        selectPosition(position: p)
+        
+    }
+    
     func selectPosition(position: Int) {
+        self.iteration = position
         for button in buttons {
             button.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
         }
@@ -88,7 +99,7 @@ public class IterationsView: UIView {
     }
     
     func onClick(button: UIButton) {
-        self.iteration = button.tag
+        
         selectPosition(position: button.tag)
         
     }

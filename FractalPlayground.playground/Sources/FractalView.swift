@@ -26,7 +26,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     var runCount: Int = 0
     
-    var iteration: Int = Constants.initialIterations
+    public var iteration: Int = Constants.initialIterations
     
     var backgroundOperation: ProcessFractal?
     
@@ -62,8 +62,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         self.addSubview(fractalDrawingView)
         self.addSubview(configurationView)
         
-        //
-        
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -71,12 +69,12 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     }
     
     func setupNumberOfPoints(_ number: Int) {
+        configurationView.iterationsView?.iteration = self.iteration
         configurationView.setNumberOfPoints(number)
     }
     
     func setPolygonSideNumber(_ number: Int) {
         
-        print("polygon calcularion:::::::::::: \(number)")
         self.shapePoints.removeAll()
         
         var center = fractalDrawingView.center
@@ -232,6 +230,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         
     }
     
+    
     private func setupOrientation(orientation: UIInterfaceOrientation) {
         
         if (orientation == .portrait) {
@@ -263,9 +262,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         self.configurationView.setOrientation(orientation: orientation)
         self.setNeedsLayout()
         
-        //if (runCount > 0) {
-            reset()
-        //}
+        reset()
         
     }
     
@@ -275,6 +272,10 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         } else {
             self.orientation = UIInterfaceOrientation.portrait
         }
+    }
+    
+    public func animateIterations() {
+        self.configurationView.animateIterations()
     }
     
     

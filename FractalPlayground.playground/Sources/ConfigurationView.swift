@@ -17,6 +17,8 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     var pointsCount: Int = 3
     
+    var isAnimateIterations: Bool = false
+    
     override public init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -25,8 +27,6 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         iterationsView = IterationsView()
         self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 10.0), size: CGSize(width: self.frame.width, height: 30.0))
         iterationsView?.setupButtons()
-        
-        //self.backgroundColor = .red
         
         self.frame = self.frame.insetBy(dx: -2.0, dy: -2.0);
         self.layer.borderWidth = 2.0
@@ -83,6 +83,16 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         didFinishMoving()
         self.setNeedsDisplay()
+        }
+    }
+    
+    func animateIterations() {
+        isAnimateIterations = true
+        
+        self.isUserInteractionEnabled = false
+        
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (timer) in
+            self.iterationsView?.selectNextIteration()
         }
     }
     
@@ -177,5 +187,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         iterationsView?.setupButtons()
         
     }
+    
+    
     
 }
