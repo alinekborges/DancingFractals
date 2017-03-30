@@ -10,7 +10,7 @@ fractalView.radius = 0.4
 
 fractalView.numberOfPoints = 7
 
-fractalView.polygonSides = 4
+fractalView.polygonSides = 3
 
 fractalView.start()
 
@@ -24,7 +24,7 @@ PlaygroundPage.current.needsIndefiniteExecution = true
  
  ----
  
- *[Aline Kolczycki Borges](http://bandes-stor.ch/), Mar 2017*
+ *[Aline Kolczycki Borges](https://github.com/alinekborges), Mar 2017*
 
  **Fractal** is a term used for the first time by Mandelbrot, in 1975. He defined it as a *"rough or fragmented geometric shape that can be split into parts, each of which is (at least approximately) a reduced-size copy of the whole"*
  

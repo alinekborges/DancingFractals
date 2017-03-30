@@ -13,7 +13,7 @@ public class FractalDrawingView: UIView {
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .clear
+        self.backgroundColor = .black
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -25,6 +25,7 @@ public class FractalDrawingView: UIView {
         
         myAnimation.fromValue = oldPath.cgPath
         myAnimation.toValue = newPath.cgPath
+        
         
         
         myAnimation.duration = 1.0
@@ -42,8 +43,8 @@ public class FractalDrawingView: UIView {
         
         layer.sublayers?.forEach { $0.removeFromSuperlayer() }
         
-        print("lines count: \(lines.count)")
-        print("iteration: \(iteration)")
+        //print("lines count: \(lines.count)")
+        //print("iteration: \(iteration)")
         
         if (iteration >= lines.count) {
             iteration = lines.count - 1

@@ -17,6 +17,8 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     var orientation: UIInterfaceOrientation = .portrait
     
+    var pointsCount: Int = 3
+    
     override public init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -26,7 +28,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 10.0), size: CGSize(width: self.frame.width, height: 30.0))
         iterationsView?.setupButtons()
         
-        self.backgroundColor = .red
+        //self.backgroundColor = .red
         
         self.frame = self.frame.insetBy(dx: -2.0, dy: -2.0);
         self.layer.borderWidth = 2.0
@@ -86,8 +88,15 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         }
     }
     
+    func redrawPoints() {
+        setNumberOfPoints(self.pointsCount)
+    }
+    
     func setNumberOfPoints(_ count: Int) {
+        
         if (count < 2) { return }
+        
+        self.pointsCount = count
         
         for p in mainPoints {
             p.removeFromSuperview()
@@ -153,13 +162,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             self.margin = 0.08
         }
         
+        self.redrawPoints()
         
         iterationsView?.setNeedsLayout()
-        
         iterationsView?.setupButtons()
-        
-        setNeedsDisplay()
-        self.superview?.setNeedsDisplay()
         
         self.orientation = orientation
     }

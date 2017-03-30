@@ -27,8 +27,6 @@ public class ProcessFractal: Operation {
         //print("hey: \(pathPoints.count)")
         redraw(points: self.pathPoints)
         
-        
-        
         for _ in 0..<iterations {
             if (self.isCancelled) { break }
             self.drawSubpaths()
@@ -51,9 +49,8 @@ public class ProcessFractal: Operation {
         while (i < self.pathPoints.count-1) {
             
             let subpoints = self.calculateMidPoints(start: i, end: i+1)
-            if (self.isCancelled) { return }
+            //if (self.isCancelled) { return }
             self.pathPoints.insert(contentsOf: subpoints, at: i+1)
-            
             
             i += subpoints.count + 1
         }
@@ -70,7 +67,7 @@ public class ProcessFractal: Operation {
         var points: [CGPoint] = []
         
         for vector in vectors {
-            if (self.isCancelled) { break }
+            //if (self.isCancelled) { break }
             let p = vector.applyTransform(newOrigin: pointA, lenght: lenght, angle: angle)
             points.append(p)
         }
@@ -88,7 +85,7 @@ public class ProcessFractal: Operation {
         var lines:[Line] = []
         
         for i in 0..<points.count {
-            if (self.isCancelled) { break }
+            //if (self.isCancelled) { break }
             bpath.addLine(to: points[i])
             
             if (i % pointsPerColor == 0) {
