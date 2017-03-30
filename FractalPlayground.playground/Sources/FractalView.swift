@@ -103,32 +103,10 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         
     }
     
-    func firstDraw() {
-        let points = self.shapePoints
-        
-        fractalDrawingView.iteration = iteration
-        
-        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: Constants.maxIterations)
-        
-        operation.completionBlock = {
-            DispatchQueue.main.async {
-                self.fractalDrawingView.lines.append(contentsOf: operation.lines)
-                self.fractalDrawingView.points = operation.pathPoints
-                self.fractalDrawingView.iteration = self.iteration
-                self.fractalDrawingView.draw()
-                //self.pointsCount = count
-            }
-        }
-        
-        self.backgroundOperation = operation
-        
-        operationQueue.addOperation(operation)
-    }
-    
     func movingDraw() {
         
         var iterations = self.iteration
-        var points = self.shapePoints
+        let points = self.shapePoints
         
         if (iterations > Constants.movingIterations ) {
             iterations = Constants.movingIterations
@@ -207,19 +185,19 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     }
     
     public func didFinishMoving() {
-        print("finish Moving 2")
+        //print("finish Moving 2")
         reset(isMoving: false)
     }
     
     public func didChangeMove() {
-        print("change Moving 2")
+        //print("change Moving 2")
         reset(isMoving: true)
     }
     
     public func didSetIteration(_ iteration: Int) {
         self.iteration = iteration
         fractalDrawingView.iteration = iteration
-        fractalDrawingView.draw(animated: false)
+        fullDraw()
     }
     
     public func start() {
@@ -229,16 +207,15 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         setupNumberOfPoints(numberOfPoints)
         setPolygonSideNumber(polygonSides)
         generateVectors()
-        firstDraw()
+        fullDraw()
     }
     
     public func reset() {
         backgroundOperation?.cancel()
         fractalDrawingView.lines.removeAll()
-        setupNumberOfPoints(numberOfPoints)
         setPolygonSideNumber(polygonSides)
         generateVectors()
-        firstDraw()
+        fullDraw()
     }
     
     public func reset(isMoving: Bool) {
@@ -286,9 +263,9 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         self.configurationView.setOrientation(orientation: orientation)
         self.setNeedsLayout()
         
-        if (runCount > 0) {
+        //if (runCount > 0) {
             reset()
-        }
+        //}
         
     }
     

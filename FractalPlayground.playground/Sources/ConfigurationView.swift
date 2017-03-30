@@ -15,8 +15,6 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     var iterationsView: IterationsView?
     
-    var orientation: UIInterfaceOrientation = .portrait
-    
     var pointsCount: Int = 3
     
     override public init(frame: CGRect) {
@@ -167,7 +165,6 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         iterationsView?.setNeedsLayout()
         iterationsView?.setupButtons()
         
-        self.orientation = orientation
     }
     
 }
