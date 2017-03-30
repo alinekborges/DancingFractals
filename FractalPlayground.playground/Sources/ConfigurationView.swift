@@ -26,6 +26,8 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 10.0), size: CGSize(width: self.frame.width, height: 30.0))
         iterationsView?.setupButtons()
         
+        self.backgroundColor = .red
+        
         self.frame = self.frame.insetBy(dx: -2.0, dy: -2.0);
         self.layer.borderWidth = 2.0
         self.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor

@@ -3,6 +3,12 @@ import UIKit
 
 public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
+    public var radius:CGFloat = 0.6
+    
+    public var numberOfPoints:Int = 4
+    
+    public var polygonSides:Int = 4
+    
     var configurationView: ConfigurationView!
     var fractalDrawingView: FractalDrawingView!
     
@@ -15,8 +21,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     var shapePoints: [CGPoint] = []
     
     var vectors: [FVector] = []
-    
-    public var radius:CGFloat = 0.6
     
     var runningCalculations = false
     
@@ -45,12 +49,10 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         }
     }
     
-    public var numberOfPoints:Int = 4
     
-    public var polygonSides:Int = 4
     
     override public init(frame: CGRect) {
-        //let frame = UIScreen.main.bounds
+        let frame = UIScreen.main.bounds
         super.init(frame: frame)
         configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
         
