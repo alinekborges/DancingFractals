@@ -117,8 +117,19 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             self.addSubview(view)
         }
         
-        mainPoints[1].center.y -= 45
-        
+        //if main points is even
+        if (mainPoints.count % 2 == 0) {
+            let lower = mainPoints.count / 2
+            print(lower)
+            let top = lower + 1
+            print(top)
+            mainPoints[lower-1].center.y -= 55
+            mainPoints[top-1].center.y -= 55
+        } else {
+            let top = mainPoints.count / 2
+            mainPoints[top].center.y -= 55
+        }
+    
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
     }
