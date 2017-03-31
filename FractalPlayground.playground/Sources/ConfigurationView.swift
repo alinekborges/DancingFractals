@@ -2,10 +2,9 @@ import Foundation
 import UIKit
 
 
-
 public class ConfigurationView: UIView, FinishMovingDelegate {
     
-    var mainPoints: [PointView] = []
+    public var mainPoints: [PointView] = []
     
     var margin:CGFloat = 0.25
     
@@ -18,6 +17,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     var pointsCount: Int = 3
     
     var isAnimateIterations: Bool = false
+    
+    var isPointsAnimated: Bool = false
+    
+    let timeInterval = Constants.timeInterval
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -96,6 +99,19 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         }
     }
     
+    func animatePoints() {
+        self.isPointsAnimated = true
+        Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true) { (timer) in
+            for point in self.mainPoints {
+                
+                point.move()
+                
+            }
+            self.didChangeMove()
+        }
+    
+    }
+    
     func redrawPoints() {
         setNumberOfPoints(self.pointsCount)
     }
@@ -140,7 +156,8 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             mainPoints[top].center.y -= 55
         }
         
-        mainPoints[0].animateX(deltaX: 150, time: 10.0)
+        mainPoints[1].animateX(delta: 150, time: 15.0)
+        mainPoints[1].animateY(delta: 50, time: 12.0)
         
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()

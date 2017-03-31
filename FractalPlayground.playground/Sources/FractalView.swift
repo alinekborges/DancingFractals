@@ -9,14 +9,8 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     public var polygonSides:Int = 4
     
-    var configurationView: ConfigurationView!
+    public var configurationView: ConfigurationView!
     var fractalDrawingView: FractalDrawingView!
-    
-    var orientation: UIInterfaceOrientation! {
-        didSet {
-            setupOrientation(orientation: orientation)
-        }
-    }
     
     var shapePoints: [CGPoint] = []
     
@@ -46,6 +40,12 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     var displayBasePolygon = false {
         didSet {
             self.setNeedsDisplay()
+        }
+    }
+    
+    var orientation: UIInterfaceOrientation! {
+        didSet {
+            setupOrientation(orientation: orientation)
         }
     }
     
@@ -276,6 +276,10 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     public func animateIterations() {
         self.configurationView.animateIterations()
+    }
+    
+    public func animatePoints() {
+        self.configurationView.animatePoints()
     }
     
     
