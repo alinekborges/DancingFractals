@@ -24,8 +24,6 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
     var backgroundOperation: ProcessFractal?
     
-    var bezierPathOperation: ProcessBezierPath = ProcessBezierPath(points: [])
-    
     let operationQueue = OperationQueue()
     
     var lines: [Line] = []

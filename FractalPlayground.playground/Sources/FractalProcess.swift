@@ -7,7 +7,6 @@ public class ProcessFractal: Operation {
     var pathPoints: [CGPoint] = []
     var iterations: Int = 1
     var vectors: [FVector] = []
-    let operationQueue = OperationQueue()
     
     var colors:[UIColor] = []
     
@@ -24,7 +23,6 @@ public class ProcessFractal: Operation {
     override public func main() {
         if self.isCancelled { return }
         
-        //print("hey: \(pathPoints.count)")
         redraw(points: self.pathPoints)
         
         for _ in 0..<iterations {
@@ -37,11 +35,6 @@ public class ProcessFractal: Operation {
     func redraw(points: [CGPoint]) {
         let lines = pathFromPoints(points: points)
         self.lines.append(lines)
-    }
-    
-    override public func cancel() {
-        super.cancel()
-        self.operationQueue.cancelAllOperations()
     }
     
     func drawSubpaths() {

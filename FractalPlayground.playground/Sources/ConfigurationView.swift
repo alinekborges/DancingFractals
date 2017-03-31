@@ -165,24 +165,26 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     
     public func didFinishMoving() {
         (superview as? FinishMovingDelegate)?.didFinishMoving()
+        self.setNeedsDisplay()
     }
     
     public func didChangeMove() {
         (superview as? FinishMovingDelegate)?.didChangeMove()
+        self.setNeedsDisplay()
     }
     
     override public func draw(_ rect: CGRect) {
         
         if (mainPoints.isEmpty) { return }
         
-        /*for i in 1..<mainPoints.count {
+        for i in 1..<mainPoints.count {
             let bezierPath = UIBezierPath()
             bezierPath.move(to: mainPoints[i-1].center)
             bezierPath.addLine(to: mainPoints[i].center)
             bezierPath.lineWidth = 2.0
             colors[i*2 - 1].set()
             bezierPath.stroke()
-        }*/
+        }
     }
     
     func setPosition(x: CGFloat, y: CGFloat, forPoint point: PointView) {
