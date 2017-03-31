@@ -139,7 +139,9 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             let top = mainPoints.count / 2
             mainPoints[top].center.y -= 55
         }
-    
+        
+        mainPoints[0].animateX(deltaX: 150, time: 10.0)
+        
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
     }
@@ -156,14 +158,14 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         if (mainPoints.isEmpty) { return }
         
-        for i in 1..<mainPoints.count {
+        /*for i in 1..<mainPoints.count {
             let bezierPath = UIBezierPath()
             bezierPath.move(to: mainPoints[i-1].center)
             bezierPath.addLine(to: mainPoints[i].center)
             bezierPath.lineWidth = 2.0
             colors[i*2 - 1].set()
             bezierPath.stroke()
-        }
+        }*/
     }
     
     func setPosition(x: CGFloat, y: CGFloat, forPoint point: PointView) {

@@ -43,7 +43,7 @@ polygonSides = /*#-editable-code*/5/*#-end-editable-code*/
 
 
 //#-hidden-code
-let fractal = FractalView(frame: CGRect(x: 0, y: 0, width: 800, height: 420))
+let fractal = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 420))
 
 fractal.radius = fractalRadius
 

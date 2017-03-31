@@ -6,7 +6,7 @@ import PlaygroundSupport
 
 Constants.initialIterations = 0
 
-let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 472, height: 600))
+let fractalView = FractalView(frame: CGRect(x: 0, y: 0, width: 390, height: 400))
 
 fractalView.radius = 0.4
 
