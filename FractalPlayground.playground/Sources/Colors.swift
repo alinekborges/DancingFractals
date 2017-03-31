@@ -3,7 +3,7 @@ import UIKit
 
 public class Colors {
     
-    static let numberOfColors = 10
+    static let numberOfColors = 16
     
     class func getColor(hue: CGFloat) -> UIColor {
         return UIColor(hue: hue, saturation: 0.5, brightness: 0.8, alpha: 1.0)
