@@ -1,6 +1,8 @@
 import Foundation
 import UIKit
 
+
+//Each point is represented by a vector, with the start point, angle, distance and full lenght
 public class FVector {
     var point: CGPoint
     var angle: CGFloat
@@ -18,6 +20,8 @@ public class FVector {
         self.lenght = origin.distanceTo(end)
         
     }
+    
+    //Pass the new origin and angle and will return the correspondent point in the new plane applying scale, translation and rotate
     func applyTransform(newOrigin origin:CGPoint, lenght: CGFloat, angle: CGFloat) -> CGPoint {
         
         let a = -(self.angle + angle)

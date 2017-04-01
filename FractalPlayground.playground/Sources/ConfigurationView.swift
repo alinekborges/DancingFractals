@@ -1,8 +1,14 @@
 import Foundation
 import UIKit
 
-
-public class ConfigurationView: UIView, FinishMovingDelegate {
+public protocol FinishMovingDelegate {
+    func didFinishMoving()
+    func didChangeMove()
+}
+/**
+ The view with the points on top of the screen
+ */
+public class ConfigurationView: UIView {
     
     public var mainPoints: [PointView] = []
     
@@ -25,10 +31,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
     override public init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.backgroundColor = UIColor(white: 0.02, alpha: 0.7)
+        self.backgroundColor = UIColor.black.withAlphaComponent(0.7)
         
         iterationsView = IterationsView()
-        self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 10.0), size: CGSize(width: self.frame.width, height: 30.0))
+        self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 20.0), size: CGSize(width: self.frame.width, height: 30.0))
         iterationsView?.setupButtons()
         
         self.frame = self.frame.insetBy(dx: -2.0, dy: -2.0);
@@ -140,7 +146,7 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         for i in 0..<count {
             let centerX = begin + step * CGFloat(i)
-            let centerY:CGFloat = self.center.y + ( 30.0 + self.iterationsView!.frame.height ) / 2.0
+            let centerY:CGFloat = self.center.y + (self.iterationsView!.frame.height ) / 2.0 + self.iterationsView!.frame.origin.y
             let view = PointView(center: CGPoint(x: centerX, y: centerY), color: colors[i*2])
             mainPoints.append(view)
             self.addSubview(view)
@@ -158,15 +164,12 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             print(lower)
             let top = lower + 1
             print(top)
-            mainPoints[lower-1].center.y -= 55
-            mainPoints[top-1].center.y -= 55
+            mainPoints[lower-1].center.y -= 85
+            mainPoints[top-1].center.y -= 85
         } else {
             let top = mainPoints.count / 2
-            mainPoints[top].center.y -= 55
+            mainPoints[top].center.y -= 85
         }
-        
-        mainPoints[1].animateX(delta: 150, time: 15.0)
-        mainPoints[1].animateY(delta: 50, time: 12.0)
         
         setNeedsDisplay()
         self.superview?.setNeedsDisplay()
@@ -206,8 +209,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 10.0), size: CGSize(width: self.frame.width, height: 30.0))
         
         if orientation == .portrait {
+            self.iterationsView?.frame.origin.y = 30.0
             self.margin = 0.25
         } else {
+            self.iterationsView?.frame.origin.y = 90.0
             self.margin = 0.08
         }
         

@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 
+//View responsable for drawing the fractal on the screen with related color
 public class FractalDrawingView: UIView {
     var lines: [[Line]] = [[]]
     

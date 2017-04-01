@@ -1,10 +1,7 @@
 import Foundation
 import UIKit
 
-public protocol FinishMovingDelegate {
-    func didFinishMoving()
-    func didChangeMove()
-}
+
 
 public struct AnimationParams {
     var currentXtime = 0.0
@@ -22,6 +19,10 @@ public struct AnimationParams {
     public init() { }
 }
 
+
+/**
+ Point View is responsable for the points on ConfigurationView and animating by itself
+ */
 public class PointView: UIView {
     let size = CGSize(width: 30.0, height: 30.0)
     let subsize = CGSize(width: 12.0, height: 12.0)

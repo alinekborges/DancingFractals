@@ -5,6 +5,10 @@ public protocol IterationsDelegate {
     func didSetIteration(_ iteration: Int)
 }
 
+
+/**
+ View with buttons to change iterations
+ */
 public class IterationsView: UIView {
     
     var buttons : [UIButton] = []

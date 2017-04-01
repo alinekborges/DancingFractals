@@ -1,7 +1,16 @@
 import Foundation
 import UIKit
 
+//Struct that holds each bezierPath with correspondent color
+public struct Line {
+    var path: UIBezierPath
+    var color: UIColor
+}
 
+/** Fractal calculations is quite heavy to be done in main thread while the point is moving
+ 
+ This is an Operation (Background Thread) that will calculate the points and notificate when it is ready
+ */
 public class ProcessFractal: Operation {
     var TAG: Int
     var pathPoints: [CGPoint] = []
@@ -25,6 +34,7 @@ public class ProcessFractal: Operation {
         
         redraw(points: self.pathPoints)
         
+        //For each iteration, draw subpaths again and again
         for _ in 0..<iterations {
             if (self.isCancelled) { break }
             self.drawSubpaths()
@@ -49,6 +59,7 @@ public class ProcessFractal: Operation {
         }
     }
     
+    //Calculate mid points between two points (based on the vectors)
     func calculateMidPoints(start: Int, end: Int) -> [CGPoint] {
         
         let pointA = self.pathPoints[start]
@@ -68,6 +79,7 @@ public class ProcessFractal: Operation {
         return points
     }
     
+    //Creates a path from points using the colors generated before
     func pathFromPoints(points: [CGPoint]) -> [Line] {
         let pointsPerColor = (points.count / Colors.numberOfColors) + 1
         var color = 0

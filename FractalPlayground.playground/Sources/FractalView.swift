@@ -1,43 +1,46 @@
 import Foundation
 import UIKit
 
+/* 
+ Main view that has all the logic to make the fractal work
+ */
 public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     
+    //*************************
+    //Variables accessible by Playground Code
     public var radius:CGFloat = 0.6
     
     public var numberOfPoints:Int = 4
     
     public var polygonSides:Int = 4
     
+    //*************************
+    
+    //Subviews
     public var configurationView: ConfigurationView!
     var fractalDrawingView: FractalDrawingView!
     
-    var shapePoints: [CGPoint] = []
     
-    var vectors: [FVector] = []
+    var shapePoints: [CGPoint] = [] //main points of polygons
     
-    var runningCalculations = false
+    var vectors: [FVector] = [] //vectors representing top points
     
     var runCount: Int = 0
     
     public var iteration: Int = Constants.initialIterations
     
-    var backgroundOperation: ProcessFractal?
+    var backgroundOperation: ProcessFractal? //Thread that calculates fractal
     
-    let operationQueue = OperationQueue()
+    let operationQueue = OperationQueue() // Queue for background operations
     
     var lines: [Line] = []
-    var oldLines: [Line] = []
     
+    
+    //*************************
+    //Watch for orientation and bounds change to redwaw screen
     override public var bounds: CGRect {
         didSet {
             setOrientationFromBounds(bounds: bounds)
-        }
-    }
-    
-    var displayBasePolygon = false {
-        didSet {
-            self.setNeedsDisplay()
         }
     }
     
@@ -46,6 +49,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
             setupOrientation(orientation: orientation)
         }
     }
+    //*************************
     
     override public init(frame: CGRect) {
         let frame = UIScreen.main.bounds
@@ -53,7 +57,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         configurationView = ConfigurationView(frame: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
         
         
-        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: frame.height*0.3, width: frame.width, height: frame.height*0.7))
+        fractalDrawingView = FractalDrawingView(frame: CGRect(x: 0, y: frame.height*0.38, width: frame.width, height: frame.height*0.62))
         
         configurationView.iterationsView?.delegate = self
         
@@ -65,6 +69,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
     func setupNumberOfPoints(_ number: Int) {
         configurationView.iterationsView?.iteration = self.iteration
@@ -103,45 +108,28 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
     func movingDraw() {
         
         var iterations = self.iteration
-        let points = self.shapePoints
         
         if (iterations > Constants.movingIterations ) {
             iterations = Constants.movingIterations
         }
         
-        fractalDrawingView.iteration = iteration
-    
-        self.runCount += 1
-        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iterations)
-        
-        
-        operation.completionBlock = {
-            DispatchQueue.main.async {
-                if (operation.TAG != self.runCount) { return }
-                
-                self.fractalDrawingView.lines = operation.lines
-                self.fractalDrawingView.points = operation.pathPoints
-                self.fractalDrawingView.draw()
-                
-            }
-        }
-        
-        operation.qualityOfService = .background
-        
-        self.backgroundOperation = operation
-        
-        operationQueue.addOperation(operation)
+        draw(iterations: iterations)
         
     }
     
     func fullDraw() {
         let iterations = self.iteration
-        let points = self.shapePoints
+        
+        draw(iterations: iterations)
+    }
+    
+    func draw(iterations: Int) {
         
         fractalDrawingView.iteration = iteration
         
         self.runCount += 1
-        let operation = ProcessFractal(withTag: self.runCount, points: points, vectors: self.vectors, iterations: iterations)
+        let operation = ProcessFractal(withTag: self.runCount, points: self.shapePoints, vectors: self.vectors, iterations: iterations)
+        
         
         operation.completionBlock = {
             DispatchQueue.main.async {
@@ -171,23 +159,11 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
         }
     }
     
-    func showBasicPolygon() {
-        let basicPath = UIBezierPath()
-        basicPath.move(to: self.shapePoints.first!)
-        for point in self.shapePoints {
-            basicPath.addLine(to: point)
-        }
-        UIColor.white.withAlphaComponent(0.3).set()
-        basicPath.stroke()
-    }
-    
     public func didFinishMoving() {
-        //print("finish Moving 2")
         reset(isMoving: false)
     }
     
     public func didChangeMove() {
-        //print("change Moving 2")
         reset(isMoving: true)
     }
     
