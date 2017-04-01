@@ -13,7 +13,7 @@ public class FractalDrawingView: UIView {
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .black
+        self.backgroundColor = .clear
     }
     
     required public init?(coder aDecoder: NSCoder) {

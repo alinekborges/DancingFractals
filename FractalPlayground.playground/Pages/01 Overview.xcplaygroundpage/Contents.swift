@@ -14,23 +14,27 @@ fractalView.numberOfPoints = 5
 
 fractalView.polygonSides = 3
 
-fractalView.start()
+fractalView.backgroundColor = .black
 
 fractalView.animateIterations()
 
 PlaygroundPage.current.liveView = fractalView
 PlaygroundPage.current.needsIndefiniteExecution = true
 
+func start() {
+    fractalView.start()
+}
+
 //#-end-hidden-code
 
 /*:
- ## Playing with Fractals
+ # Playing with Fractals
  
  ----
  
  *[Aline Kolczycki Borges](https://github.com/alinekborges), Mar 2017*
 
- The **[Koch Curve](https://en.wikipedia.org/wiki/Koch_snowflake)** (or **Koch Snowflake**) is one of the earliests fractal curves described, in a paper published in 1904.
+ The **[Koch Curve](https://en.wikipedia.org/wiki/Koch_snowflake)** (or **Koch Snowflake**) is one of the earliests fractal curves described. It appeared to the world in a paper published in 1904.
  
  The numbers on top of the screen represent each iteration. For example:
  0) **iteration 0**: The line will be just a line.
@@ -38,5 +42,8 @@ PlaygroundPage.current.needsIndefiniteExecution = true
  2) **iteration 2**: For each subline drawn at iteration 1, points will be copied again
  4) And so on...
  
- 
  */
+
+start()
+
+//: [Next](@next)

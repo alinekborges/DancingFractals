@@ -6,11 +6,15 @@ import UIKit
 import PlaygroundSupport
 
 var polygonSides = 5
+var backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
+
 
 //#-end-hidden-code
 
 /*:
- ## Make it dance!
+ # Make it dance!
+ 
+ ----
  
  The same way you could move the points around to create a shape, now we can program their movements and watch it dance by itself
  
@@ -18,9 +22,9 @@ var polygonSides = 5
  
  - Note: You can still move points around with yout finger! Check how your shape reacts to the movement
  
- 
 
- - Experiment: Try setting an animation for just one or two points and create a shape with your fingers and check out the results. **Tip** Just set animation to zero when you don't want it to move
+
+ - Experiment: Try setting an animation for just one or two points and create a shape with your fingers. **Tip:** Just set animation to zero when you don't want it to move
  
  
  **Don't forget you can save your art as image and even create a movie with it! Use the tools menu at the top right position**
@@ -55,21 +59,20 @@ let p6 = points[5]
 PlaygroundPage.current.liveView = fractalView
 PlaygroundPage.current.needsIndefiniteExecution = true
 //#-end-hidden-code
+//#-code-completion(everything, color, hide)
+backgroundColor = /*#-editable-code*/#colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)/*#-end-editable-code*/
 
+p1.animateX(delta:/*#-editable-code*/160/*#-end-editable-code*/, time:/*#-editable-code*/8/*#-end-editable-code*/)
+p1.animateY(delta:/*#-editable-code*/95/*#-end-editable-code*/, time:/*#-editable-code*/ 6/*#-end-editable-code*/)
 
-
-//#-code-completion(everything, hide)
-p1.animateX(delta:/*#-editable-code*/190/*#-end-editable-code*/, time:/*#-editable-code*/8/*#-end-editable-code*/)
-p1.animateY(delta:/*#-editable-code*/105/*#-end-editable-code*/, time:/*#-editable-code*/ 6/*#-end-editable-code*/)
-
-p2.animateX(delta:/*#-editable-code*/260/*#-end-editable-code*/, time:/*#-editable-code*/4/*#-end-editable-code*/)
+p2.animateX(delta:/*#-editable-code*/290/*#-end-editable-code*/, time:/*#-editable-code*/4/*#-end-editable-code*/)
 p2.animateY(delta:/*#-editable-code*/80/*#-end-editable-code*/, time:/*#-editable-code*/3/*#-end-editable-code*/)
 
 p3.animateX(delta:/*#-editable-code*/210/*#-end-editable-code*/, time:/*#-editable-code*/12/*#-end-editable-code*/)
 p3.animateY(delta:/*#-editable-code*/10/*#-end-editable-code*/, time:/*#-editable-code*/6/*#-end-editable-code*/)
 
-p4.animateX(delta:/*#-editable-code*/150/*#-end-editable-code*/, time:/*#-editable-code*/6/*#-end-editable-code*/)
-p4.animateY(delta:/*#-editable-code*/170/*#-end-editable-code*/, time:/*#-editable-code*/7/*#-end-editable-code*/)
+p4.animateX(delta:/*#-editable-code*/120/*#-end-editable-code*/, time:/*#-editable-code*/6/*#-end-editable-code*/)
+p4.animateY(delta:/*#-editable-code*/160/*#-end-editable-code*/, time:/*#-editable-code*/7/*#-end-editable-code*/)
 
 p5.animateX(delta:/*#-editable-code*/70/*#-end-editable-code*/, time:/*#-editable-code*/15/*#-end-editable-code*/)
 p5.animateY(delta:/*#-editable-code*/60/*#-end-editable-code*/, time:/*#-editable-code*/7/*#-end-editable-code*/)
@@ -78,3 +81,6 @@ p6.animateX(delta:/*#-editable-code*/70/*#-end-editable-code*/, time:/*#-editabl
 p6.animateY(delta:/*#-editable-code*/10/*#-end-editable-code*/, time:/*#-editable-code*/7/*#-end-editable-code*/)
 
 
+//#-hidden-code
+fractalView.backgroundColor = backgroundColor
+//#-end-hidden-code

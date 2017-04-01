@@ -6,10 +6,11 @@ import PlaygroundSupport
 var fractalRadius:CGFloat = 0.4
 var numberOfPoints = 7
 var polygonSides = 5
+var backgroundColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
 //#-end-hidden-code
 
 /*:
-## Freeplay
+ # Freeplay
  
  ----
  
@@ -17,18 +18,23 @@ var polygonSides = 5
  
  Move the points around and see how the shape creates itself.
  
- Customize the options to find different beautiful shapes. You can set iterations number to higher or lower for different looks at the same point configuration.
+ Customize the options to find different beautiful shapes.
  
- - Note: There is some pretty heavy calculations each time the point moves around, so avoid using large numbers. It can get laggy laggy and slow. Use up to 8 and you will be ok
+ **Tip:** Go fullscreen for more space to play around
+ 
+ - Note: There is some pretty heavy calculations each time the point moves around, so avoid using large numbers. It can get laggy laggy and slow. Use up to 9 and you will be fine
  
  
  
- - Experiment: Change the number of iterations on the top buttons to see how your shape reacts
+ - Experiment: Change the number of iterations on the top buttons to see check different looks for the same point configuration.
  
  
  
  - Experiment: Can you create a snowflake like shape? Use a hexagon for that
 
+ 
+ **Don't forget you can save your art as image and even create a movie with it! Use the tools menu at the top right position**
+ 
 */
 
 //#-code-completion(everything, hide)
@@ -46,6 +52,8 @@ numberOfPoints = /*#-editable-code*/7/*#-end-editable-code*/
 //This will determine how many sides there will be in the basic polygon. For example, 3 means a triangle and 4 means a square
 polygonSides = /*#-editable-code*/6/*#-end-editable-code*/
 
+backgroundColor = /*#-editable-code*/#colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)/*#-end-editable-code*/
+
 
 //#-hidden-code
 let fractal = FractalView(frame: CGRect(x: 0, y: 0, width: 400, height: 420))
@@ -55,6 +63,8 @@ fractal.radius = fractalRadius
 fractal.numberOfPoints = numberOfPoints
 
 fractal.polygonSides = polygonSides
+
+fractal.backgroundColor = backgroundColor
 
 fractal.start()
 

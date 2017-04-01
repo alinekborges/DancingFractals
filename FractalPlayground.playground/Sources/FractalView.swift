@@ -49,6 +49,12 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
             setupOrientation(orientation: orientation)
         }
     }
+    
+    override public var backgroundColor: UIColor? {
+        didSet {
+            configurationView.backgroundColor = backgroundColor?.withAlphaComponent(0.7)
+        }
+    }
     //*************************
     
     override public init(frame: CGRect) {

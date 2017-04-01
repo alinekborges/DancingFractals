@@ -31,15 +31,13 @@ public class ConfigurationView: UIView {
     override public init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-        
         iterationsView = IterationsView()
         self.iterationsView?.frame = CGRect(origin: CGPoint(x: 0, y: 20.0), size: CGSize(width: self.frame.width, height: 30.0))
         iterationsView?.setupButtons()
         
         self.frame = self.frame.insetBy(dx: -2.0, dy: -2.0);
         self.layer.borderWidth = 2.0
-        self.layer.borderColor = UIColor.white.withAlphaComponent(0.2).cgColor
+        self.layer.borderColor = UIColor.gray.withAlphaComponent(0.6).cgColor
         
         
         self.addSubview(iterationsView!)
@@ -164,11 +162,11 @@ public class ConfigurationView: UIView {
             print(lower)
             let top = lower + 1
             print(top)
-            mainPoints[lower-1].center.y -= 85
-            mainPoints[top-1].center.y -= 85
+            mainPoints[lower-1].center.y -= 65
+            mainPoints[top-1].center.y -= 65
         } else {
             let top = mainPoints.count / 2
-            mainPoints[top].center.y -= 85
+            mainPoints[top].center.y -= 65
         }
         
         setNeedsDisplay()
