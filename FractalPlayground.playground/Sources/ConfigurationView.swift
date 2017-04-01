@@ -122,7 +122,10 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
         
         self.pointsCount = count
         
+        var anims: [AnimationParams] = []
+        
         for p in mainPoints {
+            anims.append(p.animationParams)
             p.removeFromSuperview()
         }
         
@@ -141,6 +144,12 @@ public class ConfigurationView: UIView, FinishMovingDelegate {
             let view = PointView(center: CGPoint(x: centerX, y: centerY), color: colors[i*2])
             mainPoints.append(view)
             self.addSubview(view)
+        }
+        
+        for i in 0..<anims.count {
+            if (i < mainPoints.count) {
+                mainPoints[i].animationParams = anims[i]
+            }
         }
         
         //if main points is even

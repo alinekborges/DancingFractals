@@ -6,10 +6,7 @@ public protocol FinishMovingDelegate {
     func didChangeMove()
 }
 
-public class PointView: UIView {
-    let size = CGSize(width: 26.0, height: 26.0)
-    let subsize = CGSize(width: 12.0, height: 12.0)
-    
+public struct AnimationParams {
     var currentXtime = 0.0
     var currentYtime = 0.0
     
@@ -21,6 +18,15 @@ public class PointView: UIView {
     
     var timeX = 0.0
     var timeY = 0.0
+    
+    public init() { }
+}
+
+public class PointView: UIView {
+    let size = CGSize(width: 26.0, height: 26.0)
+    let subsize = CGSize(width: 12.0, height: 12.0)
+    
+    var animationParams = AnimationParams()
     
     var timeInterval = Constants.timeInterval
 
@@ -39,19 +45,19 @@ public class PointView: UIView {
     }
     
     public func animateX(delta: Int, time: Double) {
-        self.stepX = CGFloat(delta) / (CGFloat(time) / CGFloat(Constants.timeInterval))
+        self.animationParams.stepX = CGFloat(delta) / (CGFloat(time) / CGFloat(Constants.timeInterval))
         
         //it starts in the middle
-        self.currentXtime = time / 2.0
-        self.timeX = time
+        self.animationParams.currentXtime = time / 2.0
+        self.animationParams.timeX = time
     }
     
     public func animateY(delta: Int, time: Double) {
-        self.stepY = CGFloat(delta) / (CGFloat(time) / CGFloat(Constants.timeInterval))
+        self.animationParams.stepY = CGFloat(delta) / (CGFloat(time) / CGFloat(Constants.timeInterval))
         
         //it starts in the middle
-        self.currentYtime = time / 2.0
-        self.timeY = time
+        self.animationParams.currentYtime = time / 2.0
+        self.animationParams.timeY = time
     }
     
     func move() {
@@ -60,15 +66,15 @@ public class PointView: UIView {
     }
     
     func moveX() {
-        self.currentXtime += self.timeInterval
-        if (self.currentXtime > timeX) {
+        self.animationParams.currentXtime += self.timeInterval
+        if (self.animationParams.currentXtime > animationParams.timeX) {
             //starts over
-            self.currentXtime = 0.0
+            self.animationParams.currentXtime = 0.0
             //invert movement direction
-            self.directionX *= -1
+            self.animationParams.directionX *= -1
         }
         
-        var newX = self.center.x + self.stepX * CGFloat(self.directionX)
+        var newX = self.center.x + self.animationParams.stepX * CGFloat(self.animationParams.directionX)
         
         if (newX >= self.superview!.bounds.width) {
             newX = self.superview!.bounds.width
@@ -80,15 +86,15 @@ public class PointView: UIView {
     }
     
     func moveY() {
-        self.currentYtime += self.timeInterval
-        if (self.currentYtime > timeY) {
+        self.animationParams.currentYtime += self.timeInterval
+        if (self.animationParams.currentYtime > animationParams.timeY) {
             //starts over
-            self.currentYtime = 0.0
+            self.animationParams.currentYtime = 0.0
             //invert movement direction
-            self.directionY *= -1
+            self.animationParams.directionY *= -1
         }
         
-        var newY = self.center.y + self.stepY * CGFloat(self.directionY)
+        var newY = self.center.y + self.animationParams.stepY * CGFloat(self.animationParams.directionY)
         
         if (newY >= self.superview!.bounds.height) {
             newY = self.superview!.bounds.height
