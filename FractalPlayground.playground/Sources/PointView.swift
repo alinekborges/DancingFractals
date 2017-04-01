@@ -23,7 +23,7 @@ public struct AnimationParams {
 }
 
 public class PointView: UIView {
-    let size = CGSize(width: 26.0, height: 26.0)
+    let size = CGSize(width: 30.0, height: 30.0)
     let subsize = CGSize(width: 12.0, height: 12.0)
     
     var animationParams = AnimationParams()
@@ -37,7 +37,7 @@ public class PointView: UIView {
         
         let subpoint = UIView()
         subpoint.frame.size = self.subsize
-        subpoint.center = CGPoint(x: 13.0, y: 13.0)
+        subpoint.center = CGPoint(x: 15.0, y: 15.0)
         subpoint.backgroundColor = color
         subpoint.layer.cornerRadius = subpoint.frame.height/2
         self.addSubview(subpoint)
@@ -50,6 +50,8 @@ public class PointView: UIView {
         //it starts in the middle
         self.animationParams.currentXtime = time / 2.0
         self.animationParams.timeX = time
+        let rand = arc4random_uniform(2) % 2
+        self.animationParams.directionX = rand == 0 ? 1 : -1
     }
     
     public func animateY(delta: Int, time: Double) {
@@ -58,6 +60,9 @@ public class PointView: UIView {
         //it starts in the middle
         self.animationParams.currentYtime = time / 2.0
         self.animationParams.timeY = time
+        
+        let rand = arc4random_uniform(2) % 2
+        self.animationParams.directionY = rand == 0 ? 1 : -1
     }
     
     func move() {

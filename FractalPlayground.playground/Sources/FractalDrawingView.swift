@@ -36,7 +36,7 @@ public class FractalDrawingView: UIView {
             
             shapeLayer.path = newLines[i].path.cgPath
             shapeLayer.strokeColor = newLines[i].color.cgColor
-            shapeLayer.lineWidth = 2.0
+            shapeLayer.lineWidth = 1.0
             shapeLayer.fillColor = UIColor.clear.cgColor
             self.layer.addSublayer(shapeLayer)
             

@@ -1,4 +1,3 @@
-//: [Previous](@previous)
 //#-hidden-code
 import UIKit
 import PlaygroundSupport
@@ -19,8 +18,6 @@ var polygonSides = 5
  Customize the options to find different beautiful shapes. You can set iterations number to higher or lower for different looks at the same point configuration.
  
  - Note: There is some pretty heavy calculations each time the point moves around, so avoid using large numbers. It can get laggy laggy and slow. Use up to 8 and you will be ok
- 
- Because of this calculations, while you move the points it will work up to the third iteration. If you have selected more than that, it will appear after you drop the point.
  
  - Experiment: Change the number of iterations on the top buttons to see how your shape reacts
  
