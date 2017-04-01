@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 
 let PI2 = CGFloat(2*M_PI)
+let PI = CGFloat(M_PI)
 
 extension CGPoint {
     func distanceTo(_ point: CGPoint) -> CGFloat {
@@ -17,10 +18,11 @@ extension CGPoint {
         //arc tg isn't a continuous function
         //for some x and y variations, it needs to be added or removed M_PI (180 degrees)
         //for correct angle calculations
-        if (x < 0 && y > 0) {
-            a = atan(y/x) - CGFloat(M_PI)
+        
+       if (x <= 0 && y >= 0) {
+            a = atan(y/x) - PI
         } else if (x < 0 && y < 0) {
-            a = atan(y/x) + CGFloat(M_PI)
+            a = atan(y/x) + PI
         } else {
             a = atan(y/x)
         }

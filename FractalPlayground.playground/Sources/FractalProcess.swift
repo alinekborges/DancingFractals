@@ -56,7 +56,7 @@ public class ProcessFractal: Operation {
         
         let lenght = pointA.distanceTo(pointB)
         let angle = pointA.angleTo(pointB)
-        
+
         var points: [CGPoint] = []
         
         for vector in vectors {

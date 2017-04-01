@@ -39,7 +39,7 @@ numberOfPoints = /*#-editable-code*/7/*#-end-editable-code*/
 
 
 //This will determine how many sides there will be in the basic polygon. For example, 3 means a triangle and 4 means a square
-polygonSides = /*#-editable-code*/5/*#-end-editable-code*/
+polygonSides = /*#-editable-code*/6/*#-end-editable-code*/
 
 
 //#-hidden-code

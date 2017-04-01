@@ -95,6 +95,7 @@ public class FractalView: UIView, FinishMovingDelegate, IterationsDelegate {
             self.shapePoints.append(point)
         }
         
+        
         shapePoints.append(shapePoints.first!)
         
     }

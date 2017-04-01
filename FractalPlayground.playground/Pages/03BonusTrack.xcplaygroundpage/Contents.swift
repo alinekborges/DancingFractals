@@ -15,7 +15,7 @@ fractalView.radius = 0.4
 
 fractalView.numberOfPoints = 5
 
-fractalView.polygonSides = 5
+fractalView.polygonSides = 6
 
 fractalView.start()
 

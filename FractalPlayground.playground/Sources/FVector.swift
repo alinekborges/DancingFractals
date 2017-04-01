@@ -20,16 +20,7 @@ public class FVector {
     }
     func applyTransform(newOrigin origin:CGPoint, lenght: CGFloat, angle: CGFloat) -> CGPoint {
         
-        var a = -(self.angle + angle)
-        
-        while a < 0 {
-            a += PI2
-        }
-        
-        while a > PI2 {
-            a -= PI2
-        }
-        
+        let a = -(self.angle + angle)
         
         let scale = lenght / self.lenght
         
