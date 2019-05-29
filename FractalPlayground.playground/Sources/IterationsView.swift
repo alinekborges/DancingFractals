@@ -102,7 +102,7 @@ public class IterationsView: UIView {
         self.setNeedsDisplay()
     }
     
-    func onClick(button: UIButton) {
+    @objc func onClick(button: UIButton) {
         
         selectPosition(position: button.tag)
         
